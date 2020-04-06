@@ -1,0 +1,126 @@
+body {
+	display: block;
+	width: 587px;
+	height: 570px;
+	background: #FFFFFF;
+	border: 1px solid #663366;
+	box-sizing: border-box;
+}
+
+#mail-header {
+	display: block;
+	float: top;
+	height: 105px;
+	left: 283px;
+	top: 20px;
+	background: url(https://teamloan.pt/template-resources/mail-header.jpg);
+}
+
+#mail-body {
+	display: block;
+	height: 405px;
+	left: 283px;
+	top: 20px;
+	background: #FFFFFF;
+	box-sizing: border-box;
+}
+
+#mail-footer {
+	display: block;
+	float: bottom;
+	height: 58px;
+	left: 283px;
+	top: 532px;
+	background: #333333;
+}
+
+#team-loan-logo {
+	position: absolute;
+	width: 84px;
+	height: 57px;
+	left: 69px;
+	top: 24px;
+	background: url(https://teamloan.pt/template-resources/logo.svg);
+}
+
+#mail-body-thumbs-up {
+	position: absolute;
+	width: 58px;
+	height: 54px;
+	left: 69px;
+	top: 143px;
+	background: url(https://teamloan.pt/template-resources/thumbs-up.svg);
+}
+
+#mail-body-title {
+	position: absolute;
+	left: 147px;
+ 	right: 85px;
+	top: 143px;
+	bottom: 376px;
+	height: 46px;
+	width: 355px;
+	
+	font-family: Work Sans;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 20px;
+	line-height: 23px;
+	text-transform: uppercase;
+	
+	color: #663366;
+}
+
+#mail-body-lines {
+	position: absolute;
+	left: 94px;
+	right: 209.55px;
+	top: 255px;
+	bottom: 136px;
+}
+
+#mail-body-text {
+	position: absolute;
+	width: 374px;
+	height: 148px;
+	left: 132px;
+	top: 230px;
+	
+	font-family: Work Sans;
+	font-style: normal;
+	font-weight: normal;
+	font-size: 12px;
+	line-height: 14px;
+	text-align: justify;
+	
+	color: #000000;
+}
+
+#mail-footer-text {
+	position: absolute;
+	width: 184px;
+	height: 12px;
+	left: 132px;
+	top: 540px;
+	
+	font-family: Work Sans;
+	font-style: normal;
+	font-weight: normal;
+	font-size: 10px;
+	line-height: 12px;
+	/* identical to box height */
+	
+	text-align: right;
+	
+	color: #FFFFFF;
+}
+
+#mail-footer-logo{
+	position: relative;
+	width: 97px;
+	height: 36px;
+	left: 328px;
+	top: 15px;
+	
+	box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
