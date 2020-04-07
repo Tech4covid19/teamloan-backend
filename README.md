@@ -1,4 +1,7 @@
-# teamloan-backend project
+# TeamLoan backend API
+This project is the [TeamLoan](teamloan.pt) backend API.
+
+## Quarkus framework
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
