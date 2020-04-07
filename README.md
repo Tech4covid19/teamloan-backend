@@ -1,5 +1,5 @@
 # TeamLoan backend API
-This project is the [TeamLoan](teamloan.pt) backend API.
+This project is the [TeamLoan](https://www.teamloan.pt) backend API.
 
 ## Quarkus framework
 
