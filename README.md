@@ -1,5 +1,5 @@
 # TeamLoan backend API
-![TeamLoan](/src/main/resources/META-INF/resources/template-resources/mail-header-joined.jpg "TeamLoan logo")
+<img src="/src/main/resources/META-INF/resources/template-resources/mail-header-joined.jpg" width=100%>
 
 This project is the [TeamLoan](https://www.teamloan.pt) backend API.
 
