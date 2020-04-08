@@ -1,13 +1,16 @@
 package pt.teamloan.ws;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import javax.inject.Inject;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -20,38 +23,45 @@ import org.jboss.logmanager.Level;
 import org.jboss.logmanager.Logger;
 
 import pt.teamloan.exception.EntityAlreadyExistsException;
+import pt.teamloan.model.CompanyEntity;
 import pt.teamloan.model.ProspectEntity;
-import pt.teamloan.service.ProspectService;
+import pt.teamloan.service.CompanyService;
 
-@Path("/prospect")
+@Path("/company")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ProspectResource {
-	private static final Logger LOGGER = Logger.getLogger(ProspectResource.class.getName());
+public class CompanyResource {
+	private static final Logger LOGGER = Logger.getLogger(CompanyResource.class.getName());
 	
 	@Inject
-	ProspectService prospectService;
+	CompanyService companyService;
 
 	@POST
 	@Counted
 	@Bulkhead(value = 2, waitingTaskQueue = 2)
 	@Asynchronous
-	public CompletionStage<Response> post(ProspectEntity prospectEntity) {
+	public CompletionStage<Response> post(CompanyEntity company) {
 		try {
-			LOGGER.info("POST /prospect with email: " + prospectEntity.getEmail());
-			CompletionStage<Void> sendMailCompletionStage = prospectService.registerProspect(prospectEntity);
-			LOGGER.info("Successfully sent prospect email to: " + prospectEntity.getEmail());
-			return sendMailCompletionStage.thenApply(f -> Response.accepted().entity(new GenericResponse()).build());
+			LOGGER.info("POST /company: " + company.toString());
+			CompletionStage<Void> keycloakCompletionStage = companyService.register(company);
+			LOGGER.info("Successfully registered company: " + company.getUuid());
+			return keycloakCompletionStage.thenApply(f -> Response.accepted().entity(new GenericResponse(company.getUuid())).build());
 		} catch (ConstraintViolationException e) {
-			LOGGER.log(Level.ERROR, "Prospect constraint validation!", e);
+			LOGGER.log(Level.ERROR, "Company constraint validation!", e);
 			CompletableFuture<Response> cf = new CompletableFuture<Response>();
 			cf.complete(Response.status(Status.BAD_REQUEST).entity(new GenericResponse(e)).build());
 			return cf;
 		} catch (EntityAlreadyExistsException e) {
-			LOGGER.log(Level.ERROR, "Email already exists validation!", e);
+			LOGGER.log(Level.ERROR, "Email or VAT already exists validation!", e);
 			CompletableFuture<Response> cf = new CompletableFuture<Response>();
 			cf.complete(Response.status(Status.CONFLICT).entity(new GenericResponse(e)).build());
 			return cf;
 		}
+	}
+	
+	@GET
+	@Path("/{uuid}")
+	public CompanyEntity getByUUID(@PathParam("uuid") String uuid) {
+		return companyService.getByUUID(uuid);
 	}
 }

@@ -9,8 +9,8 @@ import javax.validation.Valid;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.quarkus.mailer.MailTemplate;
-import pt.teamloan.db.ProspectEntity;
 import pt.teamloan.exception.EntityAlreadyExistsException;
+import pt.teamloan.model.ProspectEntity;
 
 @ApplicationScoped
 public class ProspectService {
@@ -23,11 +23,11 @@ public class ProspectService {
 
 	@Transactional
 	public CompletionStage<Void> registerProspect(@Valid ProspectEntity prospectEntity) throws EntityAlreadyExistsException {
-		if(ProspectEntity.count("email", prospectEntity.email) > 0) {
+		if(ProspectEntity.count("email", prospectEntity.getEmail()) > 0) {
 			throw new EntityAlreadyExistsException("Email already exists");
 		}
 		prospectEntity.persist();
-		CompletionStage<Void> sendMailCompletionStage = prospect.to(prospectEntity.email)
+		CompletionStage<Void> sendMailCompletionStage = prospect.to(prospectEntity.getEmail())
 				.subject(prospectMailSubject).send();
 		return sendMailCompletionStage;
 	}
