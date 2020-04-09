@@ -3,6 +3,8 @@ package pt.teamloan.ws;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.security.PermitAll;
+import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -14,6 +16,8 @@ import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 
 @Path("/properties")
 @Produces(MediaType.APPLICATION_JSON)
+@RequestScoped
+@PermitAll
 public class PropertiesResource {
 
 	private static final String FILTER_PASSWORD_KEYWORD = "password";

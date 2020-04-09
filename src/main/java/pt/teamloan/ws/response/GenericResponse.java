@@ -1,4 +1,4 @@
-package pt.teamloan.ws;
+package pt.teamloan.ws.response;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ public class GenericResponse {
 		this.success = true;
 		this.errors = new ArrayList();
 	}
-	
+
 	public GenericResponse(UUID uuid) {
 		this.uuid = uuid;
 		this.success = true;
@@ -75,6 +75,11 @@ public class GenericResponse {
 
 	public void setUuid(UUID uuid) {
 		this.uuid = uuid;
+	}
+
+	@Override
+	public String toString() {
+		return "GenericResponse [uuid=" + uuid + ", success=" + success + ", errors=" + errors + "]";
 	}
 
 }

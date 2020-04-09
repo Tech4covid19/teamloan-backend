@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.UUID;
 
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,6 +18,10 @@ import javax.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
@@ -33,6 +38,7 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 	@Id
 	@SequenceGenerator(name="POSTING_JOB_ID_GENERATOR", sequenceName="POSTING_JOB_ID_SEQ")
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="POSTING_JOB_ID_GENERATOR")
+	@JsonbTransient
 	private Integer id;
 
 	@Type(type="pg-uuid")

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,6 +14,10 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
@@ -29,6 +34,7 @@ public class BusinessAreaEntity extends PanacheEntityBase implements Serializabl
 	@Id
 	@SequenceGenerator(name="BUSINESS_AREA_ID_GENERATOR", sequenceName="BUSINESS_AREA_ID_SEQ")
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="BUSINESS_AREA_ID_GENERATOR")
+	@JsonbTransient
 	private Integer id;
 
 	@Type(type="pg-uuid")
