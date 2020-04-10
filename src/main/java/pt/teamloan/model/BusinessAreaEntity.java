@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.json.bind.annotation.JsonbTransient;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,8 +13,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,6 +31,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
  */
 @Entity
 @Table(name="business_area")
+@Where(clause = "fl_deleted = false")
 public class BusinessAreaEntity extends PanacheEntityBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -40,11 +44,15 @@ public class BusinessAreaEntity extends PanacheEntityBase implements Serializabl
 	@Type(type="pg-uuid")
 	private UUID uuid;
 
+	@NotBlank
 	private String name;
 
 	//bi-directional many-to-one association to Company
 	@OneToMany(mappedBy="businessArea")
 	private List<CompanyEntity> companies;
+
+	@Column(name = "fl_deleted")
+	private boolean flDeleted = false;
 
 	public BusinessAreaEntity() {
 	}
@@ -94,5 +102,12 @@ public class BusinessAreaEntity extends PanacheEntityBase implements Serializabl
 
 		return company;
 	}
+	
+	public boolean isFlDeleted() {
+		return flDeleted;
+	}
 
+	public void setFlDeleted(boolean flDeleted) {
+		this.flDeleted = flDeleted;
+	}
 }

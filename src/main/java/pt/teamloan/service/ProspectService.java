@@ -27,6 +27,11 @@ public class ProspectService {
 			throw new EntityAlreadyExistsException("Email already exists");
 		}
 		prospectEntity.persist();
+		CompletionStage<Void> sendMailCompletionStage = sendConfirmationEmail(prospectEntity);
+		return sendMailCompletionStage;
+	}
+
+	public CompletionStage<Void> sendConfirmationEmail(ProspectEntity prospectEntity) {
 		CompletionStage<Void> sendMailCompletionStage = prospect.to(prospectEntity.getEmail())
 				.subject(prospectMailSubject).send();
 		return sendMailCompletionStage;

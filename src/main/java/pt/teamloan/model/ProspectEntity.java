@@ -13,6 +13,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,6 +23,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 @Entity
 @Table(name = "prospect")
+@Where(clause = "fl_deleted = false")
 public class ProspectEntity extends PanacheEntityBase {
 
 	@Id
@@ -37,6 +39,9 @@ public class ProspectEntity extends PanacheEntityBase {
 	@CreationTimestamp
 	@Column(name = "created_at")
 	private Date createdAt;
+
+	@Column(name = "fl_deleted")
+	private boolean flDeleted = false;
 
 	public Long getId() {
 		return id;
@@ -60,6 +65,14 @@ public class ProspectEntity extends PanacheEntityBase {
 
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public boolean isFlDeleted() {
+		return flDeleted;
+	}
+
+	public void setFlDeleted(boolean flDeleted) {
+		this.flDeleted = flDeleted;
 	}
 
 }

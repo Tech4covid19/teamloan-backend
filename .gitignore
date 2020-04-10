@@ -579,3 +579,4 @@ hs_err_pid*
 ./**/lib/
 ./**/index.xml
 ./**/o2c.html
+/.env

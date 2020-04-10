@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -32,6 +33,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
  */
 @Entity
 @Table(name="posting_job")
+@Where(clause = "fl_deleted = false")
 public class PostingJobEntity extends PanacheEntityBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -69,6 +71,9 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 	@ManyToOne
 	@JoinColumn(name="id_posting")
 	private PostingEntity posting;
+
+	@Column(name = "fl_deleted")
+	private boolean flDeleted = false;
 
 	public PostingJobEntity() {
 	}
@@ -144,5 +149,11 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 	public void setPosting(PostingEntity posting) {
 		this.posting = posting;
 	}
+	public boolean isFlDeleted() {
+		return flDeleted;
+	}
 
+	public void setFlDeleted(boolean flDeleted) {
+		this.flDeleted = flDeleted;
+	}
 }

@@ -27,6 +27,7 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -40,6 +41,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
  */
 @Entity
 @Table(name = "company")
+@Where(clause = "fl_deleted = false")
 public class CompanyEntity extends PanacheEntityBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -91,6 +93,9 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 
 //	@OneToMany(mappedBy="company", fetch = FetchType.LAZY)
 //	private List<PostingEntity> postings;
+
+	@Column(name = "fl_deleted")
+	private boolean flDeleted = false;
 
 	public CompanyEntity() {
 	}
@@ -212,5 +217,12 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 //
 //		return posting;
 //	}
+	
+	public boolean isFlDeleted() {
+		return flDeleted;
+	}
 
+	public void setFlDeleted(boolean flDeleted) {
+		this.flDeleted = flDeleted;
+	}
 }

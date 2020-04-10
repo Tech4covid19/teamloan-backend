@@ -16,6 +16,8 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import pt.teamloan.authserver.constants.RoleConstants;
+
 /**
  * Implementation of AuthServerService specifically for keycloak authorization
  * server
@@ -49,6 +51,7 @@ public class KeycloakServiceImpl implements AuthServerService {
 		userRepresentation.setUsername(authServerUser.getUsername());
 		userRepresentation.setEmail(authServerUser.getEmail());
 		userRepresentation.setAttributes(Collections.singletonMap("uuid", Arrays.asList(authServerUser.getUuid())));
+		userRepresentation.setRealmRoles(Arrays.asList(RoleConstants.END_USER));
 
 		CredentialRepresentation passwordCred = new CredentialRepresentation();
 		passwordCred.setTemporary(false);
@@ -59,9 +62,9 @@ public class KeycloakServiceImpl implements AuthServerService {
 		
 		// Get realm
 		RealmResource realmResource = keycloak.realm(realm);
-		UsersResource usersRessource = realmResource.users();
+		UsersResource usersResource = realmResource.users();
 
-		Response response = usersRessource.create(userRepresentation);
+		Response response = usersResource.create(userRepresentation);
 		System.out.printf("Repsonse: %s %s%n", response.getStatus(), response.getStatusInfo());
 		System.out.println(response.getLocation());
 		String userId = CreatedResponseUtil.getCreatedId(response);
