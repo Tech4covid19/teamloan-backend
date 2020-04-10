@@ -37,7 +37,6 @@ public class CompanyService {
 		return CompletableFuture.completedFuture(null);
 	}
 	
-	@Transactional
 	public CompanyEntity getByUUID(String uuid) {
 		return CompanyEntity.find("uuid", UUID.fromString(uuid)).firstResult();
 	}
