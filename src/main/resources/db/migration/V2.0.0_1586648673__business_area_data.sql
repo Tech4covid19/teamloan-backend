@@ -1,0 +1,17 @@
+INSERT INTO public.business_area (uuid,"name",fl_deleted) VALUES 
+('f55d41b7-3d6d-42aa-86a1-226d98216093','Agricultura e Pecuária',false)
+,('e258a5a6-f8f8-4f02-b45e-48f690ef7af3','Alojamento, hotelaria e turismo',false)
+,('b0d38e84-59b9-4c48-96d1-53c180955a2f','Apoio social',false)
+,('c6e3f415-17e9-47b5-8a13-80b9598fb5a9','Atividades financeiras e seguros',false)
+,('bc3e341d-a9b1-41c4-9e05-5e6bdd56ace3','Comércio',false)
+,('7c6ed122-5809-4d67-a642-c2b880d6c2bc','Construção',false)
+,('6702d3a7-71d1-45bd-a483-c7d749e9f552','Educação',false)
+,('2cf76a6c-d9ed-4bb4-ad8a-b854944cd73d','Eletricidade, gás e água',false)
+,('0d843ba0-032b-4903-b09a-599f54944893','Imobiliário',false)
+,('87d1ec02-0c78-435d-9468-f9a17ef6bdcd','Indústria',false)
+,('be00f770-1862-4153-9d30-18f496cf529c','Limpeza e Higiene',false)
+,('33496cca-4159-4ee3-a9dc-4b95d9f82192','Restauração',false)
+,('d1ea8517-5070-4879-9699-fee153c8eb8f','Saúde',false)
+,('1c81ce12-b1c1-4e58-95a2-83ef2ba58618','Tecnologia, telecomunicações e media',false)
+,('2f43533d-de88-4588-ad52-0d76f15d6067','Transporte e armazenagem',false)
+;
