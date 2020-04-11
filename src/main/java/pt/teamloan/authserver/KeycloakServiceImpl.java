@@ -28,6 +28,12 @@ import pt.teamloan.authserver.constants.RoleConstants;
 @ApplicationScoped
 public class KeycloakServiceImpl implements AuthServerService {
 
+	private static final String CLIENT_ID_TEAMLOAN_WEB_APP = "TEAMLOAN_WEB_APP";
+
+	private static final String ATTRIBUTE_UUID = "uuid";
+
+	private static final String ACTION_VERIFY_EMAIL = "VERIFY_EMAIL";
+
 	@ConfigProperty(name = "keycloak.realm")
 	String realm;
 
@@ -47,11 +53,12 @@ public class KeycloakServiceImpl implements AuthServerService {
 		lazyLoadKeycloakAdminClient();
 		// Define user
 		UserRepresentation userRepresentation = new UserRepresentation();
-		userRepresentation.setEnabled(false);
+		userRepresentation.setEnabled(true);
 		userRepresentation.setUsername(authServerUser.getUsername());
 		userRepresentation.setEmail(authServerUser.getEmail());
-		userRepresentation.setAttributes(Collections.singletonMap("uuid", Arrays.asList(authServerUser.getUuid())));
+		userRepresentation.setAttributes(Collections.singletonMap(ATTRIBUTE_UUID, Arrays.asList(authServerUser.getUuid())));
 		userRepresentation.setRealmRoles(Arrays.asList(RoleConstants.END_USER));
+		userRepresentation.setRequiredActions(Arrays.asList(ACTION_VERIFY_EMAIL));
 
 		CredentialRepresentation passwordCred = new CredentialRepresentation();
 		passwordCred.setTemporary(false);
@@ -59,15 +66,15 @@ public class KeycloakServiceImpl implements AuthServerService {
 		passwordCred.setValue(authServerUser.getPassword());
 		userRepresentation.setCredentials(Arrays.asList(passwordCred));
 		
-		
 		// Get realm
 		RealmResource realmResource = keycloak.realm(realm);
 		UsersResource usersResource = realmResource.users();
 
 		Response response = usersResource.create(userRepresentation);
-		System.out.printf("Repsonse: %s %s%n", response.getStatus(), response.getStatusInfo());
+		System.out.printf("Response: %s %s%n", response.getStatus(), response.getStatusInfo());
 		System.out.println(response.getLocation());
 		String userId = CreatedResponseUtil.getCreatedId(response);
+		usersResource.get(userId).executeActionsEmail(CLIENT_ID_TEAMLOAN_WEB_APP, "https://frontend.teamloan.pt", 259200, Arrays.asList(ACTION_VERIFY_EMAIL));
 		return new AuthServerResponse(userId);
 	}
 

@@ -19,7 +19,9 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1
 ARG JAVA_PACKAGE=java-11-openjdk-headless
 ARG RUN_JAVA_VERSION=1.3.5
 
-ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en'
+RUN microdnf install glibc-langpack-en
+
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 # Install java and the run-java script
 # Also set up permissions for user `1001`
@@ -36,6 +38,8 @@ RUN microdnf install openssl curl ca-certificates ${JAVA_PACKAGE} \
     && chown 1001 /deployments/run-java.sh \
     && chmod 540 /deployments/run-java.sh \
     && echo "securerandom.source=file:/dev/urandom" >> /etc/alternatives/jre/lib/security/java.security
+
+# RUN localedef -i en_US -f en_US.UTF-8
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
