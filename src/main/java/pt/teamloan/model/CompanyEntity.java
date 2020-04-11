@@ -46,7 +46,7 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name = "COMPANY_ID_GENERATOR", sequenceName = "COMPANY_ID_SEQ")
+	@SequenceGenerator(name = "COMPANY_ID_GENERATOR", sequenceName = "COMPANY_ID_SEQ", allocationSize = 1)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "COMPANY_ID_GENERATOR")
 	@JsonbTransient
 	private Integer id;
@@ -74,8 +74,6 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 
 	private String phone;
 
-	private String responsible;
-
 	@CreationTimestamp
 	@Column(name = "created_at")
 	private Timestamp createdAt;
@@ -91,8 +89,8 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 	@Transient
 	private String password;
 
-//	@OneToMany(mappedBy="company", fetch = FetchType.LAZY)
-//	private List<PostingEntity> postings;
+	@OneToMany(mappedBy="company", fetch = FetchType.LAZY)
+	private List<PostingEntity> postings;
 
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
@@ -140,14 +138,6 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 		this.phone = phone;
 	}
 
-	public String getResponsible() {
-		return this.responsible;
-	}
-
-	public void setResponsible(String responsible) {
-		this.responsible = responsible;
-	}
-
 	public Timestamp getUpdatedAt() {
 		return this.updatedAt;
 	}
@@ -188,6 +178,7 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 		this.businessArea = businessArea;
 	}
 
+	@JsonbTransient
 	public String getPassword() {
 		return password;
 	}
@@ -196,27 +187,27 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 		this.password = password;
 	}
 
-//	public List<PostingEntity> getPostings() {
-//		return this.postings;
-//	}
-//
-//	public void setPostings(List<PostingEntity> postings) {
-//		this.postings = postings;
-//	}
+	public List<PostingEntity> getPostings() {
+		return this.postings;
+	}
 
-//	public PostingEntity addPosting(PostingEntity posting) {
-//		getPostings().add(posting);
-//		posting.setCompany(this);
-//
-//		return posting;
-//	}
-//
-//	public PostingEntity removePosting(PostingEntity posting) {
-//		getPostings().remove(posting);
-//		posting.setCompany(null);
-//
-//		return posting;
-//	}
+	public void setPostings(List<PostingEntity> postings) {
+		this.postings = postings;
+	}
+
+	public PostingEntity addPosting(PostingEntity posting) {
+		getPostings().add(posting);
+		posting.setCompany(this);
+
+		return posting;
+	}
+
+	public PostingEntity removePosting(PostingEntity posting) {
+		getPostings().remove(posting);
+		posting.setCompany(null);
+
+		return posting;
+	}
 	
 	public boolean isFlDeleted() {
 		return flDeleted;

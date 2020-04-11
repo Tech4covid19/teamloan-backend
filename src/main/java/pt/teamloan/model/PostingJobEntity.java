@@ -7,6 +7,8 @@ import java.util.UUID;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,51 +27,55 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-
+import pt.teamloan.model.enums.PostingStatus;
 
 /**
  * The persistent class for the posting_job database table.
  * 
  */
 @Entity
-@Table(name="posting_job")
+@Table(name = "posting_job")
 @Where(clause = "fl_deleted = false")
 public class PostingJobEntity extends PanacheEntityBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="POSTING_JOB_ID_GENERATOR", sequenceName="POSTING_JOB_ID_SEQ")
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="POSTING_JOB_ID_GENERATOR")
+	@SequenceGenerator(name = "POSTING_JOB_ID_GENERATOR", sequenceName = "POSTING_JOB_ID_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "POSTING_JOB_ID_GENERATOR")
 	@JsonbTransient
 	private Integer id;
 
-	@Type(type="pg-uuid")
+	@Type(type = "pg-uuid")
 	private UUID uuid;
 
-	@Column(name="other_job")
+	@Column(name = "other_job")
 	private String otherJob;
-
-	private String status;
+	
+	@Column(name = "number_of_people")
+	private Integer numberOfPeople;
+	
+	@Enumerated(EnumType.STRING)
+	private PostingStatus status;
 
 	@CreationTimestamp
 	@Column(name = "created_at")
 	private Timestamp createdAt;
 
 	@UpdateTimestamp
-	@Column(name="updated_at")
+	@Column(name = "updated_at")
 	private Timestamp updatedAt;
 
-	@Column(name="updated_status_at")
+	@Column(name = "updated_status_at")
 	private Timestamp updatedStatusAt;
 
-	//bi-directional many-to-one association to Job
+	// bi-directional many-to-one association to Job
 	@ManyToOne
-	@JoinColumn(name="id_job")
+	@JoinColumn(name = "id_job")
 	private JobEntity job;
 
-	//bi-directional many-to-one association to Posting
+	// bi-directional many-to-one association to Posting
 	@ManyToOne
-	@JoinColumn(name="id_posting")
+	@JoinColumn(name = "id_posting")
 	private PostingEntity posting;
 
 	@Column(name = "fl_deleted")
@@ -102,11 +108,11 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 		this.otherJob = otherJob;
 	}
 
-	public String getStatus() {
-		return this.status;
+	public PostingStatus getStatus() {
+		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(PostingStatus status) {
 		this.status = status;
 	}
 
@@ -149,6 +155,7 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 	public void setPosting(PostingEntity posting) {
 		this.posting = posting;
 	}
+
 	public boolean isFlDeleted() {
 		return flDeleted;
 	}

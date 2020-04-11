@@ -38,7 +38,7 @@ public class JobEntity extends PanacheEntityBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="JOB_ID_GENERATOR", sequenceName="JOB_ID_SEQ")
+	@SequenceGenerator(name="JOB_ID_GENERATOR", sequenceName="JOB_ID_SEQ", allocationSize = 1)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="JOB_ID_GENERATOR")
 	@JsonbTransient
 	private Integer id;

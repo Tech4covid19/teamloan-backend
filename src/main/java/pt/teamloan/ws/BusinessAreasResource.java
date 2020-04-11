@@ -28,7 +28,7 @@ import pt.teamloan.ws.response.GenericResponse;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
-public class BusinessAreaResource {
+public class BusinessAreasResource {
 	
 	@Inject
 	BusinessAreaService businessAreaService;

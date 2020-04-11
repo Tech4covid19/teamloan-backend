@@ -36,7 +36,7 @@ public class BusinessAreaEntity extends PanacheEntityBase implements Serializabl
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="BUSINESS_AREA_ID_GENERATOR", sequenceName="BUSINESS_AREA_ID_SEQ")
+	@SequenceGenerator(name="BUSINESS_AREA_ID_GENERATOR", sequenceName="BUSINESS_AREA_ID_SEQ", allocationSize = 1)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="BUSINESS_AREA_ID_GENERATOR")
 	@JsonbTransient
 	private Integer id;
@@ -46,10 +46,6 @@ public class BusinessAreaEntity extends PanacheEntityBase implements Serializabl
 
 	@NotBlank
 	private String name;
-
-	//bi-directional many-to-one association to Company
-	@OneToMany(mappedBy="businessArea")
-	private List<CompanyEntity> companies;
 
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
@@ -81,28 +77,6 @@ public class BusinessAreaEntity extends PanacheEntityBase implements Serializabl
 		this.uuid = uuid;
 	}
 
-	public List<CompanyEntity> getCompanies() {
-		return this.companies;
-	}
-
-	public void setCompanies(List<CompanyEntity> companies) {
-		this.companies = companies;
-	}
-
-	public CompanyEntity addCompany(CompanyEntity company) {
-		getCompanies().add(company);
-		company.setBusinessArea(this);
-
-		return company;
-	}
-
-	public CompanyEntity removeCompany(CompanyEntity company) {
-		getCompanies().remove(company);
-		company.setBusinessArea(null);
-
-		return company;
-	}
-	
 	public boolean isFlDeleted() {
 		return flDeleted;
 	}

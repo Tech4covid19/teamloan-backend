@@ -8,6 +8,8 @@ import java.util.UUID;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,35 +24,27 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-
+import pt.teamloan.model.enums.PostingStatus;
 
 /**
  * The persistent class for the posting database table.
  * 
  */
 @Entity
-@Table(name="posting")
+@Table(name = "posting")
 @Where(clause = "fl_deleted = false")
 public class PostingEntity extends PanacheEntityBase implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="POSTING_ID_GENERATOR", sequenceName="POSTING_ID_SEQ")
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="POSTING_ID_GENERATOR")
+	@SequenceGenerator(name = "POSTING_ID_GENERATOR", sequenceName = "POSTING_ID_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "POSTING_ID_GENERATOR")
 	@JsonbTransient
 	private Integer id;
-	
-	@Type(type="pg-uuid")
+
+	@Type(type = "pg-uuid")
 	private UUID uuid;
-
-	private String city;
-
-	private String district;
 
 	private String email;
 
@@ -58,11 +52,12 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 
 	private String phone;
 
-	private String status;
+	@Enumerated(EnumType.STRING)
+	private PostingStatus status;
 
 	private String title;
 
-	@Column(name="zip_code")
+	@Column(name = "zip_code")
 	private String zipCode;
 
 	@CreationTimestamp
@@ -70,23 +65,29 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 	private Timestamp createdAt;
 
 	@UpdateTimestamp
-	@Column(name="updated_at")
+	@Column(name = "updated_at")
 	private Timestamp updatedAt;
 
-	@Column(name="updated_status_at")
+	@Column(name = "updated_status_at")
 	private Timestamp updatedStatusAt;
 
-	//bi-directional many-to-one association to Company
 	@ManyToOne
-	@JoinColumn(name="id_company")
+	@JoinColumn(name = "id_company")
 	private CompanyEntity company;
 
-	//bi-directional many-to-one association to PostingJob
-	@OneToMany(mappedBy="posting")
+	@OneToMany(mappedBy = "posting")
 	private List<PostingJobEntity> postingJobs;
-	
+
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
+
+	@ManyToOne
+	@JoinColumn(name = "id_district")
+	private DistrictEntity district;
+
+	@ManyToOne
+	@JoinColumn(name = "id_municipality")
+	private MunicipalityEntity municipality;
 
 	public PostingEntity() {
 	}
@@ -99,28 +100,12 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 		this.id = id;
 	}
 
-	public String getCity() {
-		return this.city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
-	}
-
 	public Timestamp getCreatedAt() {
 		return this.createdAt;
 	}
 
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
-	}
-
-	public String getDistrict() {
-		return this.district;
-	}
-
-	public void setDistrict(String district) {
-		this.district = district;
 	}
 
 	public String getEmail() {
@@ -147,11 +132,11 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 		this.phone = phone;
 	}
 
-	public String getStatus() {
-		return this.status;
+	public PostingStatus getStatus() {
+		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(PostingStatus status) {
 		this.status = status;
 	}
 
@@ -224,11 +209,28 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 
 		return postingJob;
 	}
+
 	public boolean isFlDeleted() {
 		return flDeleted;
 	}
 
 	public void setFlDeleted(boolean flDeleted) {
 		this.flDeleted = flDeleted;
+	}
+
+	public DistrictEntity getDistrict() {
+		return this.district;
+	}
+
+	public void setDistrict(DistrictEntity district) {
+		this.district = district;
+	}
+
+	public MunicipalityEntity getMunicipality() {
+		return this.municipality;
+	}
+
+	public void setMunicipality(MunicipalityEntity municipality) {
+		this.municipality = municipality;
 	}
 }
