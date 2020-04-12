@@ -45,6 +45,7 @@ public class MunicipalityEntity extends io.quarkus.hibernate.orm.panache.Panache
 	
 	private String code;
 
+	@JsonbTransient
 	@Column(name="created_at")
 	private Timestamp createdAt;
 
@@ -54,6 +55,7 @@ public class MunicipalityEntity extends io.quarkus.hibernate.orm.panache.Panache
 
 	private String name;
 
+	@JsonbTransient
 	@Column(name="updated_at")
 	private Timestamp updatedAt;
 

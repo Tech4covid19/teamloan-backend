@@ -35,6 +35,7 @@ public class DistrictEntity extends io.quarkus.hibernate.orm.panache.PanacheEnti
 	
 	private String code;
 
+	@JsonbTransient
 	@Column(name="created_at")
 	private Timestamp createdAt;
 
@@ -44,6 +45,7 @@ public class DistrictEntity extends io.quarkus.hibernate.orm.panache.PanacheEnti
 
 	private String name;
 
+	@JsonbTransient
 	@Column(name="updated_at")
 	private Timestamp updatedAt;
 
