@@ -78,6 +78,7 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 	@OneToMany(mappedBy = "posting")
 	private List<PostingJobEntity> postingJobs;
 
+	@JsonbTransient
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
 

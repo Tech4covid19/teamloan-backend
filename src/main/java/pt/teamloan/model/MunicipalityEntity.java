@@ -48,6 +48,7 @@ public class MunicipalityEntity extends io.quarkus.hibernate.orm.panache.Panache
 	@Column(name="created_at")
 	private Timestamp createdAt;
 
+	@JsonbTransient
 	@Column(name="fl_deleted")
 	private boolean flDeleted;
 

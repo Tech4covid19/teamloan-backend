@@ -78,6 +78,7 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 	@JoinColumn(name = "id_posting")
 	private PostingEntity posting;
 
+	@JsonbTransient
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
 

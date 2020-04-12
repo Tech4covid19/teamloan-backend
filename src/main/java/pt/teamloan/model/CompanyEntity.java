@@ -9,6 +9,8 @@ import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -29,11 +31,8 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import pt.teamloan.model.enums.CompanyIntent;
 
 /**
  * The persistent class for the company database table.
@@ -89,11 +88,12 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 	@Transient
 	private String password;
 
-	@OneToMany(mappedBy="company", fetch = FetchType.LAZY)
-	private List<PostingEntity> postings;
-
+	@JsonbTransient
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
+
+	@Enumerated(EnumType.STRING)
+	private CompanyIntent intent;
 
 	public CompanyEntity() {
 	}
@@ -162,7 +162,7 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 		this.vat = vat;
 	}
 
-	public String getZip_code() {
+	public String getZipCode() {
 		return this.zipCode;
 	}
 
@@ -187,28 +187,6 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 		this.password = password;
 	}
 
-	public List<PostingEntity> getPostings() {
-		return this.postings;
-	}
-
-	public void setPostings(List<PostingEntity> postings) {
-		this.postings = postings;
-	}
-
-	public PostingEntity addPosting(PostingEntity posting) {
-		getPostings().add(posting);
-		posting.setCompany(this);
-
-		return posting;
-	}
-
-	public PostingEntity removePosting(PostingEntity posting) {
-		getPostings().remove(posting);
-		posting.setCompany(null);
-
-		return posting;
-	}
-	
 	public boolean isFlDeleted() {
 		return flDeleted;
 	}
@@ -216,4 +194,13 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 	public void setFlDeleted(boolean flDeleted) {
 		this.flDeleted = flDeleted;
 	}
+
+	public CompanyIntent getIntent() {
+		return intent;
+	}
+
+	public void setIntent(CompanyIntent intent) {
+		this.intent = intent;
+	}
+
 }

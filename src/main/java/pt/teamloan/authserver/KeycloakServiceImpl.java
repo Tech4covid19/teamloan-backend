@@ -2,11 +2,14 @@ package pt.teamloan.authserver;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logmanager.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
@@ -14,6 +17,8 @@ import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.RolesRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import pt.teamloan.authserver.constants.RoleConstants;
@@ -28,10 +33,10 @@ import pt.teamloan.authserver.constants.RoleConstants;
 @ApplicationScoped
 public class KeycloakServiceImpl implements AuthServerService {
 
+	private static final Logger LOGGER = Logger.getLogger(KeycloakServiceImpl.class.getName());
+	
 	private static final String CLIENT_ID_TEAMLOAN_WEB_APP = "TEAMLOAN_WEB_APP";
-
 	private static final String ATTRIBUTE_UUID = "uuid";
-
 	private static final String ACTION_VERIFY_EMAIL = "VERIFY_EMAIL";
 
 	@ConfigProperty(name = "keycloak.realm")
@@ -51,7 +56,41 @@ public class KeycloakServiceImpl implements AuthServerService {
 	@Override
 	public AuthServerResponse createUser(AuthServerUser authServerUser) throws AuthServerException {
 		lazyLoadKeycloakAdminClient();
+		
 		// Define user
+		UserRepresentation userRepresentation = buildUserRepresentation(authServerUser);
+		
+		// Get realm resources
+		RealmResource realmResource = keycloak.realm(realm);
+		UsersResource usersResource = realmResource.users();
+		
+		// Create user
+		Response response = usersResource.create(userRepresentation);
+		String userId = CreatedResponseUtil.getCreatedId(response);
+		LOGGER.info("Created user " + userId + " on authorization server. Adding END_USER role...");
+		
+		// Assign END_USER role
+		addRoleToUser(usersResource, userId, RoleConstants.END_USER);
+		LOGGER.info("Successfully added END_USER role to user " + userId);
+		
+		// FIXME: TODO: send verify email with actual link and parameters for our frontend instead of keycloak
+		usersResource.get(userId).executeActionsEmail(CLIENT_ID_TEAMLOAN_WEB_APP, "https://frontend.teamloan.pt", 259200, Arrays.asList(ACTION_VERIFY_EMAIL));
+		return new AuthServerResponse(userId);
+	}
+
+	private void addRoleToUser(UsersResource usersResource, String userId, String roleName) throws AuthServerException {
+		List<RoleRepresentation> availableRoles = usersResource.get(userId).roles().realmLevel().listAvailable();
+		if(availableRoles != null && !availableRoles.isEmpty()) {
+			Optional<RoleRepresentation> endUserRoleOptional = availableRoles.stream().filter(r -> roleName.equals(r.getName())).findAny();
+			if(endUserRoleOptional.isEmpty()) {
+				throw new AuthServerException(AuthServerErrorMessage.MISSING_END_USER_ROLE, roleName, realm, userId);
+			} else {
+				usersResource.get(userId).roles().realmLevel().add(Arrays.asList(endUserRoleOptional.get()));
+			}
+		}
+	}
+
+	private UserRepresentation buildUserRepresentation(AuthServerUser authServerUser) {
 		UserRepresentation userRepresentation = new UserRepresentation();
 		userRepresentation.setEnabled(true);
 		userRepresentation.setUsername(authServerUser.getUsername());
@@ -65,17 +104,7 @@ public class KeycloakServiceImpl implements AuthServerService {
 		passwordCred.setType(CredentialRepresentation.PASSWORD);
 		passwordCred.setValue(authServerUser.getPassword());
 		userRepresentation.setCredentials(Arrays.asList(passwordCred));
-		
-		// Get realm
-		RealmResource realmResource = keycloak.realm(realm);
-		UsersResource usersResource = realmResource.users();
-
-		Response response = usersResource.create(userRepresentation);
-		System.out.printf("Response: %s %s%n", response.getStatus(), response.getStatusInfo());
-		System.out.println(response.getLocation());
-		String userId = CreatedResponseUtil.getCreatedId(response);
-		usersResource.get(userId).executeActionsEmail(CLIENT_ID_TEAMLOAN_WEB_APP, "https://frontend.teamloan.pt", 259200, Arrays.asList(ACTION_VERIFY_EMAIL));
-		return new AuthServerResponse(userId);
+		return userRepresentation;
 	}
 
 	private Keycloak lazyLoadKeycloakAdminClient() {

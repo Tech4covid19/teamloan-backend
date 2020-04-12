@@ -40,6 +40,7 @@ public class ProspectEntity extends PanacheEntityBase {
 	@Column(name = "created_at")
 	private Date createdAt;
 
+	@JsonbTransient
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
 

@@ -47,6 +47,7 @@ public class BusinessAreaEntity extends PanacheEntityBase implements Serializabl
 	@NotBlank
 	private String name;
 
+	@JsonbTransient
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
 
