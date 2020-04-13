@@ -16,10 +16,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
@@ -95,6 +97,9 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 	@ManyToOne(cascade = CascadeType.REFRESH)
 	@JoinColumn(name = "id_municipality")
 	private MunicipalityEntity municipality;
+
+	@Size(min = 1, max = 4000)
+	private String notes;
 
 	public PostingEntity() {
 	}
@@ -204,10 +209,10 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 
 	public void setPostingJobs(List<PostingJobEntity> postingJobs) {
 		this.postingJobs = postingJobs;
-		if(postingJobs != null && !postingJobs.isEmpty()) {
+		if (postingJobs != null && !postingJobs.isEmpty()) {
 			for (PostingJobEntity postingJobEntity : postingJobs) {
 				postingJobEntity.setPosting(this);
-			}	
+			}
 		}
 	}
 
@@ -248,4 +253,13 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 	public void setMunicipality(MunicipalityEntity municipality) {
 		this.municipality = municipality;
 	}
+
+	public String getNotes() {
+		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
+	}
+
 }
