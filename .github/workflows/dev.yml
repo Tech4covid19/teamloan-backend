@@ -20,11 +20,7 @@ jobs:
         with:
           java-version: '11.0.4' # The JDK version to make available on the path.
       - name: Maven build
-        run: mvn clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.tag=dev
-  deploy:
-    needs: build
-    runs-on: [ubuntu-18.04]
-    steps:
+        run: mvn clean package -Dquarkus-profile=dev -Dquarkus.container-image.build=true -Dquarkus.container-image.tag=dev
       - name: Docker login
         uses: azure/docker-login@v1
         with:
@@ -32,6 +28,11 @@ jobs:
           password: ${{ secrets.docker_password }}
       - name: Docker push
         run: docker push teamloan/teamloan-backend:env
+  deploy:
+    needs: build
+    runs-on: [ubuntu-18.04]
+    steps:
+
       - name: Checkout
         uses: actions/checkout@v2
       - name: Configure AWS credentials
