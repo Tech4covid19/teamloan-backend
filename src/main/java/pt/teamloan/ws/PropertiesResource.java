@@ -12,12 +12,18 @@ import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 
 
 @Path("/properties")
 @Produces(MediaType.APPLICATION_JSON)
 @RequestScoped
 @PermitAll
+@Bulkhead
+@Timed
+@Timeout(value = 5000)
 public class PropertiesResource {
 
 	private static final String FILTER_PASSWORD_KEYWORD = "password";

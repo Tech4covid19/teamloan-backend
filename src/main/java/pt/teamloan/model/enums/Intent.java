@@ -1,5 +1,5 @@
 package pt.teamloan.model.enums;
 
-public enum CompanyIntent {
+public enum Intent {
 	SEEK, LEND, BOTH
 }

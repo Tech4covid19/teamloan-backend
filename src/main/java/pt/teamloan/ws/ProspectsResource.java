@@ -17,7 +17,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.jboss.logmanager.Level;
 import org.jboss.logmanager.Logger;
 
@@ -30,6 +32,9 @@ import pt.teamloan.ws.response.GenericResponse;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
+@Bulkhead
+@Timed
+@Timeout(value = 5000)
 public class ProspectsResource {
 	private static final Logger LOGGER = Logger.getLogger(ProspectsResource.class.getName());
 	
@@ -37,7 +42,6 @@ public class ProspectsResource {
 	ProspectService prospectService;
 
 	@POST
-	@Counted
 	@Bulkhead(value = 2, waitingTaskQueue = 2)
 	@Asynchronous
 	@PermitAll

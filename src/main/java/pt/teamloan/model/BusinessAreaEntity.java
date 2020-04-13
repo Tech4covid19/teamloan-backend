@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import pt.teamloan.model.interfaces.UUIDMappeable;
 
 
 /**
@@ -32,7 +33,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 @Entity
 @Table(name="business_area")
 @Where(clause = "fl_deleted = false")
-public class BusinessAreaEntity extends PanacheEntityBase implements Serializable {
+public class BusinessAreaEntity extends PanacheEntityBase implements Serializable, UUIDMappeable {
 	private static final long serialVersionUID = 1L;
 
 	@Id

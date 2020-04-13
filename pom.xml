@@ -111,6 +111,10 @@
 			<artifactId>keycloak-admin-client</artifactId>
 			<version>9.0.2</version>
 		</dependency>
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-cache</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

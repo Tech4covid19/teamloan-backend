@@ -5,8 +5,12 @@ import java.io.Serializable;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.persistence.*;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
+
+import pt.teamloan.model.interfaces.UUIDMappeable;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -21,7 +25,7 @@ import java.util.UUID;
 @Table(name="district")
 @NamedQuery(name="DistrictEntity.findAll", query="SELECT d FROM DistrictEntity d")
 @Where(clause = "fl_deleted = false")
-public class DistrictEntity extends io.quarkus.hibernate.orm.panache.PanacheEntityBase implements Serializable {
+public class DistrictEntity extends io.quarkus.hibernate.orm.panache.PanacheEntityBase implements Serializable, UUIDMappeable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -36,6 +40,7 @@ public class DistrictEntity extends io.quarkus.hibernate.orm.panache.PanacheEnti
 	private String code;
 
 	@JsonbTransient
+	@CreationTimestamp
 	@Column(name="created_at")
 	private Timestamp createdAt;
 
@@ -46,6 +51,7 @@ public class DistrictEntity extends io.quarkus.hibernate.orm.panache.PanacheEnti
 	private String name;
 
 	@JsonbTransient
+	@UpdateTimestamp
 	@Column(name="updated_at")
 	private Timestamp updatedAt;
 
@@ -71,7 +77,8 @@ public class DistrictEntity extends io.quarkus.hibernate.orm.panache.PanacheEnti
 	public Timestamp getCreatedAt() {
 		return this.createdAt;
 	}
-
+	
+	@JsonbTransient
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
 	}
@@ -95,7 +102,8 @@ public class DistrictEntity extends io.quarkus.hibernate.orm.panache.PanacheEnti
 	public Timestamp getUpdatedAt() {
 		return this.updatedAt;
 	}
-
+	
+	@JsonbTransient
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}

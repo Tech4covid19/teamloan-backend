@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import pt.teamloan.model.interfaces.UUIDMappeable;
 
 
 /**
@@ -34,7 +35,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 @Entity
 @Table(name="job")
 @Where(clause = "fl_deleted = false")
-public class JobEntity extends PanacheEntityBase implements Serializable {
+public class JobEntity extends PanacheEntityBase implements Serializable, UUIDMappeable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -46,10 +47,12 @@ public class JobEntity extends PanacheEntityBase implements Serializable {
 	@Type(type="pg-uuid")
 	private UUID uuid;
 
+	@JsonbTransient
 	@CreationTimestamp
 	@Column(name = "created_at")
 	private Timestamp createdAt;
 
+	@JsonbTransient
 	@UpdateTimestamp
 	@Column(name="updated_at")
 	private Timestamp updatedAt;
@@ -58,6 +61,7 @@ public class JobEntity extends PanacheEntityBase implements Serializable {
 	
 	//bi-directional many-to-one association to PostingJob
 	@OneToMany(mappedBy="job")
+	@JsonbTransient
 	private List<PostingJobEntity> postingJobs;
 
 	@JsonbTransient
@@ -79,6 +83,7 @@ public class JobEntity extends PanacheEntityBase implements Serializable {
 		return this.createdAt;
 	}
 
+	@JsonbTransient
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
 	}
@@ -95,6 +100,7 @@ public class JobEntity extends PanacheEntityBase implements Serializable {
 		return this.updatedAt;
 	}
 
+	@JsonbTransient
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}

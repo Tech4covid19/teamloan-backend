@@ -1,5 +1,6 @@
 package pt.teamloan.authserver;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +10,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.jboss.logmanager.Level;
 import org.jboss.logmanager.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.CreatedResponseUtil;
@@ -65,20 +68,32 @@ public class KeycloakServiceImpl implements AuthServerService {
 		UsersResource usersResource = realmResource.users();
 		
 		// Create user
-		Response response = usersResource.create(userRepresentation);
-		String userId = CreatedResponseUtil.getCreatedId(response);
-		LOGGER.info("Created user " + userId + " on authorization server. Adding END_USER role...");
+		String userId = executeCreateUserRequest(userRepresentation, usersResource);
+		LOGGER.log(Level.DEBUG, "Created user " + userId + " on authorization server. Adding END_USER role...");
 		
 		// Assign END_USER role
 		addRoleToUser(usersResource, userId, RoleConstants.END_USER);
-		LOGGER.info("Successfully added END_USER role to user " + userId);
+		LOGGER.log(Level.DEBUG, "Successfully added END_USER role to user " + userId);
 		
 		// FIXME: TODO: send verify email with actual link and parameters for our frontend instead of keycloak
-		usersResource.get(userId).executeActionsEmail(CLIENT_ID_TEAMLOAN_WEB_APP, "https://frontend.teamloan.pt", 259200, Arrays.asList(ACTION_VERIFY_EMAIL));
+		sendConfirmationEmail(usersResource, userId);
 		return new AuthServerResponse(userId);
 	}
 
-	private void addRoleToUser(UsersResource usersResource, String userId, String roleName) throws AuthServerException {
+	@Retry(maxRetries = 3, delay = 500, delayUnit = ChronoUnit.MILLIS)
+	protected void sendConfirmationEmail(UsersResource usersResource, String userId) {
+		usersResource.get(userId).executeActionsEmail(CLIENT_ID_TEAMLOAN_WEB_APP, "https://frontend.teamloan.pt", 259200, Arrays.asList(ACTION_VERIFY_EMAIL));
+	}
+
+	@Retry(maxRetries = 3, delay = 500, delayUnit = ChronoUnit.MILLIS)
+	protected String executeCreateUserRequest(UserRepresentation userRepresentation, UsersResource usersResource) {
+		Response response = usersResource.create(userRepresentation);
+		String userId = CreatedResponseUtil.getCreatedId(response);
+		return userId;
+	}
+
+	@Retry(maxRetries = 3, delay = 500, delayUnit = ChronoUnit.MILLIS, abortOn = AuthServerException.class)
+	protected void addRoleToUser(UsersResource usersResource, String userId, String roleName) throws AuthServerException {
 		List<RoleRepresentation> availableRoles = usersResource.get(userId).roles().realmLevel().listAvailable();
 		if(availableRoles != null && !availableRoles.isEmpty()) {
 			Optional<RoleRepresentation> endUserRoleOptional = availableRoles.stream().filter(r -> roleName.equals(r.getName())).findAny();
@@ -87,6 +102,9 @@ public class KeycloakServiceImpl implements AuthServerService {
 			} else {
 				usersResource.get(userId).roles().realmLevel().add(Arrays.asList(endUserRoleOptional.get()));
 			}
+		} else {
+			LOGGER.log(Level.DEBUG, "No available roles to assign to user " + userId);
+			throw new AuthServerException(AuthServerErrorMessage.MISSING_END_USER_ROLE, roleName, realm, userId);
 		}
 	}
 

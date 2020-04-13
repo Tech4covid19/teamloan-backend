@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -32,7 +33,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import pt.teamloan.model.enums.CompanyIntent;
+import pt.teamloan.model.enums.Intent;
+import pt.teamloan.model.interfaces.UUIDMappeable;
 
 /**
  * The persistent class for the company database table.
@@ -41,7 +43,7 @@ import pt.teamloan.model.enums.CompanyIntent;
 @Entity
 @Table(name = "company")
 @Where(clause = "fl_deleted = false")
-public class CompanyEntity extends PanacheEntityBase implements Serializable {
+public class CompanyEntity extends PanacheEntityBase implements Serializable, UUIDMappeable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -81,7 +83,8 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 	@Column(name = "updated_at")
 	private Timestamp updatedAt;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@JsonbProperty("business-area")
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
 	@JoinColumn(name = "id_business_area")
 	private BusinessAreaEntity businessArea;
 
@@ -93,7 +96,7 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 	private boolean flDeleted = false;
 
 	@Enumerated(EnumType.STRING)
-	private CompanyIntent intent;
+	private Intent intent;
 
 	public CompanyEntity() {
 	}
@@ -110,6 +113,7 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 		return this.createdAt;
 	}
 
+	@JsonbTransient
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
 	}
@@ -142,6 +146,7 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 		return this.updatedAt;
 	}
 
+	@JsonbTransient
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
@@ -195,11 +200,11 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable {
 		this.flDeleted = flDeleted;
 	}
 
-	public CompanyIntent getIntent() {
+	public Intent getIntent() {
 		return intent;
 	}
 
-	public void setIntent(CompanyIntent intent) {
+	public void setIntent(Intent intent) {
 		this.intent = intent;
 	}
 

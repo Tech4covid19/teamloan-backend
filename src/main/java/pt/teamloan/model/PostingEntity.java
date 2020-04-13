@@ -5,7 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
+import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -25,7 +27,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import pt.teamloan.model.enums.Intent;
 import pt.teamloan.model.enums.PostingStatus;
+import pt.teamloan.model.interfaces.UUIDMappeable;
 
 /**
  * The persistent class for the posting database table.
@@ -34,7 +38,7 @@ import pt.teamloan.model.enums.PostingStatus;
 @Entity
 @Table(name = "posting")
 @Where(clause = "fl_deleted = false")
-public class PostingEntity extends PanacheEntityBase implements Serializable {
+public class PostingEntity extends PanacheEntityBase implements Serializable, UUIDMappeable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -48,12 +52,13 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 
 	private String email;
 
-	private String intention;
+	@Enumerated(EnumType.STRING)
+	private Intent intent;
 
 	private String phone;
 
 	@Enumerated(EnumType.STRING)
-	private PostingStatus status;
+	private PostingStatus status = PostingStatus.ACTIVE;
 
 	private String title;
 
@@ -71,22 +76,23 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 	@Column(name = "updated_status_at")
 	private Timestamp updatedStatusAt;
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.REFRESH)
 	@JoinColumn(name = "id_company")
 	private CompanyEntity company;
 
-	@OneToMany(mappedBy = "posting")
+	@OneToMany(mappedBy = "posting", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
+	@JsonbProperty("jobs")
 	private List<PostingJobEntity> postingJobs;
 
 	@JsonbTransient
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.REFRESH)
 	@JoinColumn(name = "id_district")
 	private DistrictEntity district;
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.REFRESH)
 	@JoinColumn(name = "id_municipality")
 	private MunicipalityEntity municipality;
 
@@ -105,6 +111,7 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 		return this.createdAt;
 	}
 
+	@JsonbTransient
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
 	}
@@ -117,12 +124,12 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 		this.email = email;
 	}
 
-	public String getIntention() {
-		return this.intention;
+	public Intent getIntent() {
+		return intent;
 	}
 
-	public void setIntention(String intention) {
-		this.intention = intention;
+	public void setIntent(Intent intent) {
+		this.intent = intent;
 	}
 
 	public String getPhone() {
@@ -153,6 +160,7 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 		return this.updatedAt;
 	}
 
+	@JsonbTransient
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
@@ -161,6 +169,7 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 		return this.updatedStatusAt;
 	}
 
+	@JsonbTransient
 	public void setUpdatedStatusAt(Timestamp updatedStatusAt) {
 		this.updatedStatusAt = updatedStatusAt;
 	}
@@ -195,6 +204,11 @@ public class PostingEntity extends PanacheEntityBase implements Serializable {
 
 	public void setPostingJobs(List<PostingJobEntity> postingJobs) {
 		this.postingJobs = postingJobs;
+		if(postingJobs != null && !postingJobs.isEmpty()) {
+			for (PostingJobEntity postingJobEntity : postingJobs) {
+				postingJobEntity.setPosting(this);
+			}	
+		}
 	}
 
 	public PostingJobEntity addPostingJob(PostingJobEntity postingJob) {

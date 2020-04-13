@@ -23,7 +23,8 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.Bulkhead;
-import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.jboss.logmanager.Level;
 import org.jboss.logmanager.Logger;
 
@@ -39,6 +40,9 @@ import pt.teamloan.ws.response.GenericResponse;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
+@Bulkhead
+@Timed
+@Timeout(value = 5000)
 public class CompaniesResource {
 	private static final Logger LOGGER = Logger.getLogger(CompaniesResource.class.getName());
 	
@@ -46,10 +50,9 @@ public class CompaniesResource {
 	CompanyService companyService;
 
 	@POST
-	@Counted
-	@Bulkhead(value = 2, waitingTaskQueue = 2)
 	@Asynchronous
 	@PermitAll
+	@Timeout(value = 10000)
 	public CompletionStage<Response> post(CompanyEntity company) throws AuthServerException {
 		try {
 			CompletionStage<Void> keycloakCompletionStage = companyService.register(company);
@@ -63,6 +66,11 @@ public class CompaniesResource {
 			LOGGER.log(Level.WARNING, "Email or VAT already exists validation!", e);
 			CompletableFuture<Response> cf = new CompletableFuture<Response>();
 			cf.complete(Response.status(Status.CONFLICT).entity(new GenericResponse(e)).build());
+			return cf;
+		} catch (Exception e) {
+			LOGGER.log(Level.ERROR, "Generic exception", e);
+			CompletableFuture<Response> cf = new CompletableFuture<Response>();
+			cf.complete(Response.status(Status.INTERNAL_SERVER_ERROR).entity(new GenericResponse(e)).build());
 			return cf;
 		}
 	}

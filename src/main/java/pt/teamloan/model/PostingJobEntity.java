@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.UUID;
 
+import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,18 +18,20 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import pt.teamloan.model.enums.PostingStatus;
+import pt.teamloan.model.interfaces.UUIDMappeable;
 
 /**
  * The persistent class for the posting_job database table.
@@ -36,7 +40,7 @@ import pt.teamloan.model.enums.PostingStatus;
 @Entity
 @Table(name = "posting_job")
 @Where(clause = "fl_deleted = false")
-public class PostingJobEntity extends PanacheEntityBase implements Serializable {
+public class PostingJobEntity extends PanacheEntityBase implements Serializable, UUIDMappeable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -49,13 +53,19 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 	private UUID uuid;
 
 	@Column(name = "other_job")
+	@JsonbProperty("other-job")
+	@Size(min = 2, max = 100)
 	private String otherJob;
-	
+
 	@Column(name = "number_of_people")
+	@JsonbProperty("number-of-people")
+	@NotNull
+	@Min(1)
+	@Max(999)
 	private Integer numberOfPeople;
-	
+
 	@Enumerated(EnumType.STRING)
-	private PostingStatus status;
+	private PostingStatus status = PostingStatus.ACTIVE;
 
 	@CreationTimestamp
 	@Column(name = "created_at")
@@ -69,13 +79,14 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 	private Timestamp updatedStatusAt;
 
 	// bi-directional many-to-one association to Job
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.REFRESH)
 	@JoinColumn(name = "id_job")
 	private JobEntity job;
 
 	// bi-directional many-to-one association to Posting
 	@ManyToOne
 	@JoinColumn(name = "id_posting")
+	@JsonbTransient
 	private PostingEntity posting;
 
 	@JsonbTransient
@@ -97,6 +108,7 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 		return this.createdAt;
 	}
 
+	@JsonbTransient
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
 	}
@@ -121,6 +133,7 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 		return this.updatedAt;
 	}
 
+	@JsonbTransient
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
@@ -129,6 +142,7 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 		return this.updatedStatusAt;
 	}
 
+	@JsonbTransient
 	public void setUpdatedStatusAt(Timestamp updatedStatusAt) {
 		this.updatedStatusAt = updatedStatusAt;
 	}
@@ -164,4 +178,13 @@ public class PostingJobEntity extends PanacheEntityBase implements Serializable 
 	public void setFlDeleted(boolean flDeleted) {
 		this.flDeleted = flDeleted;
 	}
+
+	public Integer getNumberOfPeople() {
+		return numberOfPeople;
+	}
+
+	public void setNumberOfPeople(Integer numberOfPeople) {
+		this.numberOfPeople = numberOfPeople;
+	}
+
 }

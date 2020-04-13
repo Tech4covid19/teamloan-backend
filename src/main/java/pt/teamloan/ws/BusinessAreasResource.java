@@ -19,6 +19,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
+import org.eclipse.microprofile.faulttolerance.Bulkhead;
+import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.metrics.annotation.Timed;
+
 import pt.teamloan.authserver.constants.RoleConstants;
 import pt.teamloan.model.BusinessAreaEntity;
 import pt.teamloan.service.BusinessAreaService;
@@ -28,6 +32,9 @@ import pt.teamloan.ws.response.GenericResponse;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
+@Bulkhead
+@Timed
+@Timeout(value = 5000)
 public class BusinessAreasResource {
 	
 	@Inject

@@ -64,6 +64,7 @@ public class ProspectEntity extends PanacheEntityBase {
 		return createdAt;
 	}
 
+	@JsonbTransient
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
 	}
