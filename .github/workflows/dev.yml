@@ -13,8 +13,8 @@ jobs:
   build:
     runs-on: [ubuntu-18.04]
     steps:
-      - name: List dir
-        run: ls -lh
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Maven build
         run: mvn clean package -Dquarkus.container-image.build=true
   deploy:
