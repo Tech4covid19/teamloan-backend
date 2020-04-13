@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -16,6 +17,8 @@ import org.eclipse.microprofile.faulttolerance.Bulkhead;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 
+import pt.teamloan.authserver.constants.RoleConstants;
+
 
 @Path("/properties")
 @Produces(MediaType.APPLICATION_JSON)
@@ -24,6 +27,7 @@ import org.eclipse.microprofile.metrics.annotation.Timed;
 @Bulkhead
 @Timed
 @Timeout(value = 5000)
+@RolesAllowed(RoleConstants.ADMIN)
 public class PropertiesResource {
 
 	private static final String FILTER_PASSWORD_KEYWORD = "password";

@@ -83,7 +83,6 @@ public class JobEntity extends PanacheEntityBase implements Serializable, UUIDMa
 		return this.createdAt;
 	}
 
-	@JsonbTransient
 	public void setCreatedAt(Timestamp createdAt) {
 		this.createdAt = createdAt;
 	}
@@ -100,7 +99,6 @@ public class JobEntity extends PanacheEntityBase implements Serializable, UUIDMa
 		return this.updatedAt;
 	}
 
-	@JsonbTransient
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
