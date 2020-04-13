@@ -26,10 +26,12 @@ jobs:
     runs-on: [ubuntu-18.04]
     steps:
       - name: Docker login
-        uses: azure/docker-login@v1
+        uses: manusa/actions-publish-docker@master
         with:
+          name: teamloan/teamloan-backend
           username: ${{ secrets.docker_user }}
           password: ${{ secrets.docker_password }}
+          tag: dev
       - name: Checkout
         uses: actions/checkout@v2
       - name: Configure AWS credentials
