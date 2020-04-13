@@ -31,21 +31,22 @@ import pt.teamloan.service.AddressesService;
 @Timed
 @Timeout(value = 5000)
 public class AddressesResource {
-	
+
 	@Inject
 	AddressesService addressesService;
-	
+
 	@GET
 	@Path("/districts")
-	@RolesAllowed({RoleConstants.END_USER, RoleConstants.ADMIN})
+	@RolesAllowed({ RoleConstants.END_USER, RoleConstants.ADMIN })
 	public List<DistrictEntity> getDistricts(@Context SecurityContext ctx) {
 		return addressesService.listDistrics();
 	}
-	
+
 	@GET
 	@Path("/districts/{uuid}/municipalities")
-	@RolesAllowed({RoleConstants.END_USER, RoleConstants.ADMIN})
-	public List<MunicipalityEntity> getMunicipalities(@Context SecurityContext ctx, @PathParam("uuid") String districtUUID) {
+	@RolesAllowed({ RoleConstants.END_USER, RoleConstants.ADMIN })
+	public List<MunicipalityEntity> getMunicipalities(@Context SecurityContext ctx,
+			@PathParam("uuid") String districtUUID) {
 		return addressesService.listMunicipalities(districtUUID);
 	}
 }

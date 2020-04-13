@@ -1,0 +1,25 @@
+openapi: 3.0.1
+components:
+  securitySchemes:
+    DEV:
+      type: oauth2
+      scheme: Bearer
+      bearerFormat: jwt
+      flows:
+        password:
+          tokenUrl: https://auth-dev.teamloan.pt/auth/realms/TEAMLOAN/protocol/openid-connect/token
+          refreshUrl: https://auth-dev.teamloan.pt/auth/realms/TEAMLOAN/protocol/openid-connect/token
+        clientCredentials:
+          tokenUrl: https://auth-dev.teamloan.pt/auth/realms/TEAMLOAN/protocol/openid-connect/token
+          refreshUrl: https://auth-dev.teamloan.pt/auth/realms/TEAMLOAN/protocol/openid-connect/token
+    PROD:
+      type: oauth2
+      scheme: Bearer
+      bearerFormat: jwt
+      flows:
+        password:
+          tokenUrl: https://auth.teamloan.pt/auth/realms/TEAMLOAN/protocol/openid-connect/token
+          refreshUrl: https://auth.teamloan.pt/auth/realms/TEAMLOAN/protocol/openid-connect/token
+        clientCredentials:
+          tokenUrl: https://auth.teamloan.pt/auth/realms/TEAMLOAN/protocol/openid-connect/token
+          refreshUrl: https://auth.teamloan.pt/auth/realms/TEAMLOAN/protocol/openid-connect/token
