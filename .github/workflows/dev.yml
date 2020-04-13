@@ -22,8 +22,14 @@ jobs:
       - name: Maven build
         run: mvn clean package -Dquarkus.container-image.build=true
   deploy:
+    needs: build
     runs-on: [ubuntu-18.04]
     steps:
+      - name: Docker login
+        uses: azure/docker-login@v1
+        with:
+          username: ${{ secret.docker_user }}
+          password: ${{ secret.docker_password }}
       - name: Checkout
         uses: actions/checkout@v2
       - name: Configure AWS credentials
