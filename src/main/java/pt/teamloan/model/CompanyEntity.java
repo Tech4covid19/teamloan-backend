@@ -98,6 +98,21 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable, UU
 	@Enumerated(EnumType.STRING)
 	private Intent intent;
 
+	@JsonbTransient
+	@Column(name = "auth_subject_uuid")
+	private String authSubjectUuid;
+
+	@JsonbTransient
+	@Column(name = "activation_key")
+	private String activationKey;
+
+	@JsonbTransient
+	@Column(name = "dt_activation_key_expires_at")
+	private Timestamp dtActivationKeyExpiresAt;
+
+	@Column(name = "fl_email_verified")
+	private boolean emailVerified = false;
+
 	public CompanyEntity() {
 	}
 
@@ -206,6 +221,38 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable, UU
 
 	public void setIntent(Intent intent) {
 		this.intent = intent;
+	}
+
+	public String getAuthSubjectUuid() {
+		return authSubjectUuid;
+	}
+
+	public void setAuthSubjectUuid(String authSubjectUuid) {
+		this.authSubjectUuid = authSubjectUuid;
+	}
+
+	public String getActivationKey() {
+		return activationKey;
+	}
+
+	public void setActivationKey(String activationKey) {
+		this.activationKey = activationKey;
+	}
+
+	public Timestamp getDtActivationKeyExpiresAt() {
+		return dtActivationKeyExpiresAt;
+	}
+
+	public void setDtActivationKeyExpiresAt(Timestamp dtActivationKeyExpiresAt) {
+		this.dtActivationKeyExpiresAt = dtActivationKeyExpiresAt;
+	}
+
+	public boolean isEmailVerified() {
+		return emailVerified;
+	}
+
+	public void setEmailVerified(boolean emailVerified) {
+		this.emailVerified = emailVerified;
 	}
 
 }

@@ -18,6 +18,7 @@ import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -38,7 +39,6 @@ public class KeycloakServiceImpl implements AuthServerService {
 
 	private static final Logger LOGGER = Logger.getLogger(KeycloakServiceImpl.class.getName());
 	
-	private static final String CLIENT_ID_TEAMLOAN_WEB_APP = "TEAMLOAN_WEB_APP";
 	private static final String ATTRIBUTE_UUID = "uuid";
 	private static final String ACTION_VERIFY_EMAIL = "VERIFY_EMAIL";
 
@@ -68,21 +68,24 @@ public class KeycloakServiceImpl implements AuthServerService {
 		UsersResource usersResource = realmResource.users();
 		
 		// Create user
-		String userId = executeCreateUserRequest(userRepresentation, usersResource);
-		LOGGER.log(Level.DEBUG, "Created user " + userId + " on authorization server. Adding END_USER role...");
+		String subjectUuid = executeCreateUserRequest(userRepresentation, usersResource);
+		LOGGER.log(Level.DEBUG, "Created user " + subjectUuid + " on authorization server. Adding END_USER role...");
 		
 		// Assign END_USER role
-		addRoleToUser(usersResource, userId, RoleConstants.END_USER);
-		LOGGER.log(Level.DEBUG, "Successfully added END_USER role to user " + userId);
+		addRoleToUser(usersResource, subjectUuid, RoleConstants.END_USER);
+		LOGGER.log(Level.DEBUG, "Successfully added END_USER role to user " + subjectUuid);
 		
-		// FIXME: TODO: send verify email with actual link and parameters for our frontend instead of keycloak
-		sendConfirmationEmail(usersResource, userId);
-		return new AuthServerResponse(userId);
+		return new AuthServerResponse(subjectUuid);
 	}
-
+	
+	@Override
 	@Retry(maxRetries = 3, delay = 500, delayUnit = ChronoUnit.MILLIS)
-	protected void sendConfirmationEmail(UsersResource usersResource, String userId) {
-		usersResource.get(userId).executeActionsEmail(CLIENT_ID_TEAMLOAN_WEB_APP, "https://frontend.teamloan.pt", 259200, Arrays.asList(ACTION_VERIFY_EMAIL));
+	public AuthServerResponse updateEmailToVerified(String subjectUuid) throws AuthServerException {
+		UserResource userResource = keycloak.realm(realm).users().get(subjectUuid);
+		UserRepresentation userRepresentation = userResource.toRepresentation();
+		userRepresentation.setEmailVerified(true);
+		userResource.update(userRepresentation);
+		return new AuthServerResponse(userRepresentation.getId());
 	}
 
 	@Retry(maxRetries = 3, delay = 500, delayUnit = ChronoUnit.MILLIS)
@@ -115,7 +118,6 @@ public class KeycloakServiceImpl implements AuthServerService {
 		userRepresentation.setEmail(authServerUser.getEmail());
 		userRepresentation.setAttributes(Collections.singletonMap(ATTRIBUTE_UUID, Arrays.asList(authServerUser.getUuid())));
 		userRepresentation.setRealmRoles(Arrays.asList(RoleConstants.END_USER));
-		userRepresentation.setRequiredActions(Arrays.asList(ACTION_VERIFY_EMAIL));
 
 		CredentialRepresentation passwordCred = new CredentialRepresentation();
 		passwordCred.setTemporary(false);

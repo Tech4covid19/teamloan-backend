@@ -2,13 +2,13 @@ package pt.teamloan.service;
 import java.util.concurrent.CompletionStage;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.quarkus.mailer.MailTemplate;
+import io.quarkus.qute.api.ResourcePath;
 import pt.teamloan.exception.EntityAlreadyExistsException;
 import pt.teamloan.model.ProspectEntity;
 
@@ -18,8 +18,8 @@ public class ProspectService {
 	@ConfigProperty(name = "mail.prospect.subject")
 	String prospectMailSubject;
 	
-	@Inject
-	MailTemplate prospect;
+	@ResourcePath("mails/prospect")
+	MailTemplate prospectMailTemplate;
 
 	@Transactional
 	public CompletionStage<Void> registerProspect(@Valid ProspectEntity prospectEntity) throws EntityAlreadyExistsException {
@@ -32,7 +32,7 @@ public class ProspectService {
 	}
 
 	public CompletionStage<Void> sendConfirmationEmail(ProspectEntity prospectEntity) {
-		CompletionStage<Void> sendMailCompletionStage = prospect.to(prospectEntity.getEmail())
+		CompletionStage<Void> sendMailCompletionStage = prospectMailTemplate.to(prospectEntity.getEmail())
 				.subject(prospectMailSubject).send();
 		return sendMailCompletionStage;
 	}

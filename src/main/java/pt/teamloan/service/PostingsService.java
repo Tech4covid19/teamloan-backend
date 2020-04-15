@@ -31,18 +31,23 @@ import pt.teamloan.utils.UUIDMapper;
 @ApplicationScoped
 public class PostingsService {
 
-	private static final String LIST_QUERY_WITH_PARAMETERS = "FROM PostingEntity p JOIN FETCH p.district d JOIN FETCH p.municipality m JOIN FETCH p.postingJobs pj JOIN FETCH pj.job pjj JOIN FETCH p.company c JOIN FETCH c.businessArea ca WHERE p.intent = :intent AND d.id = :districtId AND (m.id = :municipalityId OR :municipalityId IS NULL) AND (pjj.id = :jobId OR :jobId IS NULL) AND (ca.id = :businessAreaId OR :businessAreaId IS NULL)";
+	private static final String LIST_QUERY_WITH_PARAMETERS = "FROM PostingEntity p JOIN FETCH p.district d JOIN FETCH p.municipality m JOIN FETCH p.postingJobs pj JOIN FETCH pj.job pjj JOIN FETCH p.company c JOIN FETCH c.businessArea ca WHERE p.intent = :intent AND (d.id = :districtId OR :districtId IS NULL) AND (m.id = :municipalityId OR :municipalityId IS NULL) AND (pjj.id = :jobId OR :jobId IS NULL) AND (ca.id = :businessAreaId OR :businessAreaId IS NULL)";
 
 	@Inject
 	UUIDMapper uuidMapper;
 
 	public List<PostingEntity> findPaged(Page page, Intent intent, String businessAreaUuid, String districtUuid,
 			String municipalityUuid, String jobUuid) throws GenericException {
-		// coalesce
 
-		Integer districtId = uuidMapper.mapToId(districtUuid, DistrictEntity.class);
-
-		Parameters parameters = Parameters.with("intent", intent).and("districtId", districtId);
+		Parameters parameters = Parameters.with("intent", intent);
+		
+		// Optional district filter (for now)
+		if (!Strings.isNullOrEmpty(municipalityUuid)) {
+			Integer districtId = uuidMapper.mapToId(districtUuid, DistrictEntity.class);
+			parameters.and("districtId", districtId);
+		} else {
+			parameters.and("districtId", null);
+		}
 
 		// Optional municipality filter
 		if (!Strings.isNullOrEmpty(municipalityUuid)) {
@@ -67,7 +72,8 @@ public class PostingsService {
 		} else {
 			parameters.and("businessAreaId", null);
 		}
-		return PostingEntity.find(LIST_QUERY_WITH_PARAMETERS, Sort.descending("p.updatedAt"), parameters).page(page)
+		
+		return PostingEntity.find(LIST_QUERY_WITH_PARAMETERS, Sort.descending("p.createdAt"), parameters).page(page)
 				.list();
 	}
 

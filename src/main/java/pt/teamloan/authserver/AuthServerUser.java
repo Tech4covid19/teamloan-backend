@@ -8,21 +8,31 @@ package pt.teamloan.authserver;
  */
 public class AuthServerUser {
 
-	private String uuid;
+	private String subjectUuid;
 	private String username;
 	private String email;
 	private String password;
+	private String uuid;
 
 	/**
 	 * Construtor with all the params for an AuthServerUser
 	 * 
 	 */
-	public AuthServerUser(String uuid, String username, String email, String password) {
+	public AuthServerUser(String v, String username, String email, String password, String uuid) {
 		super();
-		this.uuid = uuid;
+		this.subjectUuid = subjectUuid;
 		this.username = username;
 		this.email = email;
 		this.password = password;
+		this.uuid = uuid;
+	}
+
+	public String getSub() {
+		return subjectUuid;
+	}
+
+	public void setSub(String subjectUuid) {
+		this.subjectUuid = subjectUuid;
 	}
 
 	public String getUuid() {

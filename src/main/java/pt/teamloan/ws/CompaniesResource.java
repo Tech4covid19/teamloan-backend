@@ -7,6 +7,7 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
@@ -52,11 +53,12 @@ public class CompaniesResource {
 	@POST
 	@Asynchronous
 	@PermitAll
+	@Bulkhead(value = 5, waitingTaskQueue = 5)
 	@Timeout(value = 10000)
 	public CompletionStage<Response> post(CompanyEntity company) throws AuthServerException {
 		try {
-			CompletionStage<Void> keycloakCompletionStage = companyService.register(company);
-			return keycloakCompletionStage.thenApply(f -> Response.accepted().entity(new GenericResponse(company.getUuid())).build());
+			CompletionStage<Void> registerCompanyCompletionStage = companyService.register(company);
+			return registerCompanyCompletionStage.thenApply(f -> Response.accepted().entity(new GenericResponse(company.getUuid())).build());
 		} catch (ConstraintViolationException e) {
 			LOGGER.log(Level.WARNING, "Company constraint validation!", e);
 			CompletableFuture<Response> cf = new CompletableFuture<Response>();
@@ -72,6 +74,23 @@ public class CompaniesResource {
 			CompletableFuture<Response> cf = new CompletableFuture<Response>();
 			cf.complete(Response.status(Status.INTERNAL_SERVER_ERROR).entity(new GenericResponse(e)).build());
 			return cf;
+		}
+	}
+	
+	@Path("/activation/{activationKey}")
+	@POST
+	@PermitAll
+	@Bulkhead(value = 2, waitingTaskQueue = 2)
+	public Response activation(@PathParam("activationKey") String activationKey) throws AuthServerException {
+		try {
+			CompanyEntity activatedCompany = companyService.activate(activationKey);
+			return Response.ok(new GenericResponse(activatedCompany.getUuid())).build();
+		} catch (NoResultException e) {
+			LOGGER.log(Level.ERROR, "AuthServer exception", e);
+			return Response.status(Status.NOT_FOUND).entity(new GenericResponse(e)).build();
+		} catch (Exception e) {
+			LOGGER.log(Level.ERROR, "Generic exception", e);
+			return Response.serverError().entity(new GenericResponse(e)).build();
 		}
 	}
 	
