@@ -25,7 +25,7 @@ public class AuthServerException extends Exception {
      * @param errorMessage error
      * @param params params for formatting
      */
-    public AuthServerException(AuthServerErrorMessage errorMessage, Object... params) {
+    public AuthServerException(AuthServerErrorMessage errorMessage, String... params) {
         super(errorMessage.getMessage(params));
     }
 
@@ -46,7 +46,7 @@ public class AuthServerException extends Exception {
      * @param t Exception cause
      * @param params params for message formatting
      */
-    public AuthServerException(AuthServerErrorMessage errorMessage, Throwable t, Object... params) {
+    public AuthServerException(AuthServerErrorMessage errorMessage, Throwable t, String... params) {
         super(errorMessage.getMessage(params), t);
     }
 }

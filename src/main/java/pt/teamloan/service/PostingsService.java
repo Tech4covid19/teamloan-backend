@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
@@ -30,13 +29,23 @@ import pt.teamloan.model.PostingJobEntity;
 import pt.teamloan.model.enums.Intent;
 import pt.teamloan.model.enums.PostingStatus;
 import pt.teamloan.utils.UUIDMapper;
-import pt.teamloan.ws.CompanyPostingsResource;
 
 @ApplicationScoped
 public class PostingsService {
 	private static final Logger LOGGER = Logger.getLogger(PostingsService.class.getName());
 
-	private static final String LIST_QUERY_WITH_PARAMETERS = "FROM PostingEntity p JOIN FETCH p.district d JOIN FETCH p.municipality m JOIN FETCH p.postingJobs pj JOIN FETCH pj.job pjj JOIN FETCH p.company c JOIN FETCH c.businessArea ca WHERE p.intent = :intent AND (d.id = :districtId OR :districtId IS NULL) AND (m.id = :municipalityId OR :municipalityId IS NULL) AND (pjj.id = :jobId OR :jobId IS NULL) AND (ca.id = :businessAreaId OR :businessAreaId IS NULL)";
+	private static final String LIST_QUERY_WITH_PARAMETERS = "FROM PostingEntity p "
+			+ "JOIN FETCH p.district d "
+			+ "JOIN FETCH p.municipality m "
+			+ "JOIN FETCH p.postingJobs pj "
+			+ "JOIN FETCH pj.job pjj "
+			+ "JOIN FETCH p.company c "
+			+ "JOIN FETCH c.businessArea ca "
+			+ "WHERE p.intent = :intent "
+			+ "AND (d.id = :districtId OR :districtId IS NULL) "
+			+ "AND (m.id = :municipalityId OR :municipalityId IS NULL) "
+			+ "AND (ca.id = :businessAreaId OR :businessAreaId IS NULL) "
+			+ "AND (:jobId IS NULL OR EXISTS(SELECT 1 FROM PostingJobEntity pj_aux WHERE pj_aux.job.id = :jobId AND pj_aux.posting.id = p.id))";
 
 	@Inject
 	UUIDMapper uuidMapper;
@@ -47,7 +56,7 @@ public class PostingsService {
 		Parameters parameters = Parameters.with("intent", intent);
 
 		// Optional district filter (for now)
-		if (!Strings.isNullOrEmpty(municipalityUuid)) {
+		if (!Strings.isNullOrEmpty(districtUuid)) {
 			Integer districtId = uuidMapper.mapToId(districtUuid, DistrictEntity.class);
 			parameters.and("districtId", districtId);
 		} else {
@@ -145,8 +154,9 @@ public class PostingsService {
 			foundPosting.persist();
 			return foundPosting;
 		} else {
-			throw new EntityNotFoundException("Unexisting posting for company uuid: '" + companyUuid
-					+ "' and posting uuid: '" + postingUuid + "'");
+			TeamLoanException tlException = new TeamLoanException("Unexisting posting for company uuid: '{0}' and posting uuid: '{1}'", companyUuid, postingUuid);
+			LOGGER.log(Level.ERROR, tlException.getMessage());
+			throw tlException;
 		}
 	}
 

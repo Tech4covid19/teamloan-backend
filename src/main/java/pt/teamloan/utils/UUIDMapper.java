@@ -35,7 +35,7 @@ public class UUIDMapper {
 			Integer id = mapToIdQuery.getSingleResult();
 			return id;
 		} catch (Exception e) {
-			TeamLoanException tlException = new TeamLoanException("Error mapping UUID to ID. Entity: {0}; UUID: {1}", e, entityClass.getSimpleName(), uuid);
+			TeamLoanException tlException = new TeamLoanException("Error mapping UUID to ID. Entity: {0}; UUID: {1}", e, entityClass.getSimpleName(), uuid.toString());
 			LOGGER.log(Level.ERROR, tlException.getMessage(), e);
 			throw tlException;
 		}

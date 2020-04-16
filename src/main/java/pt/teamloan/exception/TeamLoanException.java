@@ -12,7 +12,11 @@ public class TeamLoanException extends Exception {
 		super(message, cause);
 	}
 	
-	public TeamLoanException(String message, Throwable cause, Object... parameters) {
+	public TeamLoanException(String message, String... parameters) {
+		super(MessageFormat.format(message, parameters));
+	}
+	
+	public TeamLoanException(String message, Throwable cause, String... parameters) {
 		super(MessageFormat.format(message, parameters), cause);
 	}
 }

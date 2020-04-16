@@ -30,7 +30,7 @@ public enum AuthServerErrorMessage {
      * @param parameters replace params
      * @return formatted message
      */
-    public String getMessage(Object... parameters) {
+    public String getMessage(String... parameters) {
         return MessageFormat.format(this.message, parameters);
     }
 

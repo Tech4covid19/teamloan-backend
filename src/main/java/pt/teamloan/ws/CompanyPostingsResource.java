@@ -38,7 +38,7 @@ import pt.teamloan.ws.response.GenericResponse;
 @RequestScoped
 @Bulkhead
 @Timed
-@Timeout(value = 50000)
+@Timeout(value = 5000)
 public class CompanyPostingsResource {
 	private static final Logger LOGGER = Logger.getLogger(CompanyPostingsResource.class.getName());
 	
