@@ -1,0 +1,13 @@
+{
+    "sub": "5059ae05-9955-4390-9418-b1602c639e58",
+    "iss": "https://test.teamloan.pt",
+    "jti": "85d0f61a-d278-4b47-a1b1-c1f7321a95cc",
+    "aud": "account",
+    "azp": "TEAMLOAN_WEB_APP",
+    "preferred_username": "187654368",
+    "email": "fake968@fake.com",
+    "uuid": "a2d1c7bb-a2f7-4273-8453-03c0599be24a",
+    "groups": [
+        "END_USER"
+    ]
+}

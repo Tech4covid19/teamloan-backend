@@ -21,7 +21,7 @@ import pt.teamloan.authserver.AuthServerResponse;
 import pt.teamloan.authserver.AuthServerService;
 import pt.teamloan.authserver.AuthServerUser;
 import pt.teamloan.exception.EntityAlreadyExistsException;
-import pt.teamloan.exception.GenericException;
+import pt.teamloan.exception.TeamLoanException;
 import pt.teamloan.model.BusinessAreaEntity;
 import pt.teamloan.model.CompanyEntity;
 import pt.teamloan.utils.SecureKeyGenerator;
@@ -107,7 +107,7 @@ public class CompanyService {
 		return sendMailCompletionStage;
 	}
 
-	private void setBusinessAreaId(CompanyEntity company) throws GenericException {
+	private void setBusinessAreaId(CompanyEntity company) throws TeamLoanException {
 		if(company.getBusinessArea() != null && company.getBusinessArea().getUuid() != null) {
 			UUID uuid = company.getBusinessArea().getUuid();
 			company.setBusinessArea(null);

@@ -14,7 +14,7 @@ import org.jboss.logmanager.Level;
 
 import io.quarkus.cache.CacheInvalidateAll;
 import io.quarkus.cache.CacheResult;
-import pt.teamloan.exception.GenericException;
+import pt.teamloan.exception.TeamLoanException;
 
 @ApplicationScoped
 public class UUIDMapper {
@@ -26,7 +26,7 @@ public class UUIDMapper {
 
 	@CacheResult(cacheName = "map-uuid-cache")
 	@Transactional
-	public Integer mapToId(UUID uuid, Class entityClass) throws GenericException {
+	public Integer mapToId(UUID uuid, Class entityClass) throws TeamLoanException {
 		try {
 			long time = System.currentTimeMillis();
 			TypedQuery<Integer> mapToIdQuery = em
@@ -35,13 +35,12 @@ public class UUIDMapper {
 			Integer id = mapToIdQuery.getSingleResult();
 			return id;
 		} catch (Exception e) {
-			String errorMessage = formatMessageForLog("Error mapping UUID to ID. Entity: {0}; UUID: {1}",
-					entityClass.getSimpleName(), uuid);
-			LOGGER.log(Level.ERROR, errorMessage, e);
-			throw new GenericException(errorMessage, e);
+			TeamLoanException tlException = new TeamLoanException("Error mapping UUID to ID. Entity: {0}; UUID: {1}", e, entityClass.getSimpleName(), uuid);
+			LOGGER.log(Level.ERROR, tlException.getMessage(), e);
+			throw tlException;
 		}
 	}
-	public Integer mapToId(String uuid, Class entityClass) throws GenericException {
+	public Integer mapToId(String uuid, Class entityClass) throws TeamLoanException {
 		return mapToId(UUID.fromString(uuid), entityClass);
 	}
 	
@@ -49,9 +48,4 @@ public class UUIDMapper {
 	public void invalidateCache() {
 		LOGGER.info("Invalidated cache 'map-uuid-cache'");
 	}
-	
-	private String formatMessageForLog(String message, Object... parameters) {
-		return MessageFormat.format(message, parameters);
-	}
-
 }

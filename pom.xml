@@ -119,6 +119,12 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -147,7 +153,14 @@
 					</systemProperties>
 				</configuration>
 			</plugin>
+
 		</plugins>
+
+		<testResources>
+			<testResource>
+				<directory>${project.basedir}/src/test/resources</directory>
+			</testResource>
+		</testResources>
 	</build>
 	<profiles>
 		<profile>

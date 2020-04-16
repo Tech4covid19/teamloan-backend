@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -11,12 +12,14 @@ import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.jboss.logmanager.Level;
+
 import com.google.common.base.Strings;
 
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Parameters;
 import io.quarkus.panache.common.Sort;
-import pt.teamloan.exception.GenericException;
+import pt.teamloan.exception.TeamLoanException;
 import pt.teamloan.model.BusinessAreaEntity;
 import pt.teamloan.model.CompanyEntity;
 import pt.teamloan.model.DistrictEntity;
@@ -27,9 +30,11 @@ import pt.teamloan.model.PostingJobEntity;
 import pt.teamloan.model.enums.Intent;
 import pt.teamloan.model.enums.PostingStatus;
 import pt.teamloan.utils.UUIDMapper;
+import pt.teamloan.ws.CompanyPostingsResource;
 
 @ApplicationScoped
 public class PostingsService {
+	private static final Logger LOGGER = Logger.getLogger(PostingsService.class.getName());
 
 	private static final String LIST_QUERY_WITH_PARAMETERS = "FROM PostingEntity p JOIN FETCH p.district d JOIN FETCH p.municipality m JOIN FETCH p.postingJobs pj JOIN FETCH pj.job pjj JOIN FETCH p.company c JOIN FETCH c.businessArea ca WHERE p.intent = :intent AND (d.id = :districtId OR :districtId IS NULL) AND (m.id = :municipalityId OR :municipalityId IS NULL) AND (pjj.id = :jobId OR :jobId IS NULL) AND (ca.id = :businessAreaId OR :businessAreaId IS NULL)";
 
@@ -37,10 +42,10 @@ public class PostingsService {
 	UUIDMapper uuidMapper;
 
 	public List<PostingEntity> findPaged(Page page, Intent intent, String businessAreaUuid, String districtUuid,
-			String municipalityUuid, String jobUuid) throws GenericException {
+			String municipalityUuid, String jobUuid) throws TeamLoanException {
 
 		Parameters parameters = Parameters.with("intent", intent);
-		
+
 		// Optional district filter (for now)
 		if (!Strings.isNullOrEmpty(municipalityUuid)) {
 			Integer districtId = uuidMapper.mapToId(districtUuid, DistrictEntity.class);
@@ -72,7 +77,7 @@ public class PostingsService {
 		} else {
 			parameters.and("businessAreaId", null);
 		}
-		
+
 		return PostingEntity.find(LIST_QUERY_WITH_PARAMETERS, Sort.descending("p.createdAt"), parameters).page(page)
 				.list();
 	}
@@ -90,36 +95,58 @@ public class PostingsService {
 	}
 
 	@Transactional
-	public PostingEntity create(String companyUuid, @Valid PostingEntity postingEntity) throws GenericException {
+	public PostingEntity create(String companyUuid, @Valid PostingEntity postingEntity) throws TeamLoanException {
 		mapPostingCompanyId(companyUuid, postingEntity);
-		mapDistrictId(postingEntity);
-		mapMunicipalityId(postingEntity);
+		mapDistrictId(postingEntity, postingEntity.getDistrict());
+		mapMunicipalityId(postingEntity, postingEntity.getMunicipality());
+
+		setPostingJobProperties(postingEntity);
 
 		postingEntity.setUuid(UUID.randomUUID());
 		postingEntity.setStatus(PostingStatus.ACTIVE);
 		postingEntity.setUpdatedStatusAt(Timestamp.from(Instant.now()));
-		for (PostingJobEntity postingJob : postingEntity.getPostingJobs()) {
-			postingJob.setUuid(UUID.randomUUID());
-			postingJob.setStatus(PostingStatus.ACTIVE);
-			postingJob.setUpdatedStatusAt(Timestamp.from(Instant.now()));
-			mapJobId(postingJob);
-		}
+
 		postingEntity.persist();
 		return postingEntity;
 	}
 
 	@Transactional
-	public PostingEntity update(String companyUuid, String postingUuid, @Valid PostingEntity postingEntity) {
+	public PostingEntity update(String companyUuid, String postingUuid, @Valid PostingEntity postingEntity)
+			throws TeamLoanException {
 		PostingEntity foundPosting = findCompanyPosting(companyUuid, postingUuid);
 		if (foundPosting != null) {
-			// TODO: merge properties that were sent on the request
+			foundPosting
+					.setEmail(postingEntity.getEmail() != null ? postingEntity.getEmail() : foundPosting.getEmail());
+			foundPosting.setIntent(
+					postingEntity.getIntent() != null ? postingEntity.getIntent() : foundPosting.getIntent());
+			foundPosting
+					.setNotes(postingEntity.getNotes() != null ? postingEntity.getNotes() : foundPosting.getNotes());
+			foundPosting
+					.setPhone(postingEntity.getPhone() != null ? postingEntity.getPhone() : foundPosting.getPhone());
+			foundPosting
+					.setTitle(postingEntity.getTitle() != null ? postingEntity.getTitle() : foundPosting.getTitle());
+			foundPosting.setZipCode(
+					postingEntity.getZipCode() != null ? postingEntity.getZipCode() : foundPosting.getZipCode());
+			mapDistrictId(foundPosting, postingEntity.getDistrict());
+			mapMunicipalityId(foundPosting, postingEntity.getMunicipality());
 
-			// TODO: update statusLastUpdate date if status changed
+			if (postingEntity.getPostingJobs() != null && !postingEntity.getPostingJobs().isEmpty()) {
+				for (PostingJobEntity currentPostingJob : foundPosting.getPostingJobs()) {
+					currentPostingJob.setFlDeleted(true);
+				}
+				setPostingJobProperties(postingEntity);
+				foundPosting.setPostingJobs(postingEntity.getPostingJobs());
+			}
 
-			// foundPosting.persist();
+			if (postingEntity.getStatus() != null) {
+				foundPosting.setStatus(postingEntity.getStatus());
+				foundPosting.setUpdatedStatusAt(Timestamp.from(Instant.now()));
+			}
+			foundPosting.persist();
 			return foundPosting;
 		} else {
-			throw new EntityNotFoundException("Unexisting posting for uuid: " + foundPosting.getUuid().toString());
+			throw new EntityNotFoundException("Unexisting posting for company uuid: '" + companyUuid
+					+ "' and posting uuid: '" + postingUuid + "'");
 		}
 	}
 
@@ -137,38 +164,39 @@ public class PostingsService {
 	 * 
 	 * @param companyUuid   companyUuid
 	 * @param postingEntity postingEntity
-	 * @throws GenericException GenericException
+	 * @throws TeamLoanException GenericException
 	 */
-	private void mapPostingCompanyId(String companyUuid, PostingEntity postingEntity) throws GenericException {
+	private void mapPostingCompanyId(String companyUuid, PostingEntity postingEntity) throws TeamLoanException {
 		CompanyEntity companyEntity = new CompanyEntity();
 		Integer companyId = uuidMapper.mapToId(companyUuid, CompanyEntity.class);
 		companyEntity.setId(companyId);
 		postingEntity.setCompany(companyEntity);
 	}
 
-	private void mapDistrictId(PostingEntity postingEntity) throws GenericException {
-		if (postingEntity.getDistrict() != null && postingEntity.getDistrict().getUuid() != null) {
-			UUID uuid = postingEntity.getDistrict().getUuid();
+	private void mapDistrictId(PostingEntity postingEntity, DistrictEntity districtEntity) throws TeamLoanException {
+		if (districtEntity != null && districtEntity.getUuid() != null) {
+			UUID uuid = districtEntity.getUuid();
 			postingEntity.setDistrict(null);
 			Integer id = uuidMapper.mapToId(uuid, DistrictEntity.class);
-			DistrictEntity districtEntity = new DistrictEntity();
-			districtEntity.setId(id);
-			postingEntity.setDistrict(districtEntity);
+			DistrictEntity mappedDistrictEntity = new DistrictEntity();
+			mappedDistrictEntity.setId(id);
+			postingEntity.setDistrict(mappedDistrictEntity);
 		}
 	}
 
-	private void mapMunicipalityId(PostingEntity postingEntity) throws GenericException {
+	private void mapMunicipalityId(PostingEntity postingEntity, MunicipalityEntity municipalityEntity)
+			throws TeamLoanException {
 		if (postingEntity.getMunicipality() != null && postingEntity.getMunicipality().getUuid() != null) {
 			UUID uuid = postingEntity.getMunicipality().getUuid();
 			postingEntity.setMunicipality(null);
 			Integer id = uuidMapper.mapToId(uuid, MunicipalityEntity.class);
-			MunicipalityEntity municipalityEntity = new MunicipalityEntity();
-			municipalityEntity.setId(id);
-			postingEntity.setMunicipality(municipalityEntity);
+			MunicipalityEntity mappedMunicipalityEntity = new MunicipalityEntity();
+			mappedMunicipalityEntity.setId(id);
+			postingEntity.setMunicipality(mappedMunicipalityEntity);
 		}
 	}
 
-	private void mapJobId(PostingJobEntity postingJob) throws GenericException {
+	private void mapJobId(PostingJobEntity postingJob) throws TeamLoanException {
 		if (postingJob.getJob() != null && postingJob.getJob().getUuid() != null) {
 			UUID uuid = postingJob.getJob().getUuid();
 			postingJob.setJob(null);
@@ -179,7 +207,12 @@ public class PostingsService {
 		}
 	}
 
-	public static void main(String[] args) {
-		System.out.println(UUID.randomUUID());
+	private void setPostingJobProperties(PostingEntity postingEntity) throws TeamLoanException {
+		for (PostingJobEntity postingJob : postingEntity.getPostingJobs()) {
+			postingJob.setUuid(UUID.randomUUID());
+			postingJob.setStatus(PostingStatus.ACTIVE);
+			postingJob.setUpdatedStatusAt(Timestamp.from(Instant.now()));
+			mapJobId(postingJob);
+		}
 	}
 }

@@ -9,6 +9,7 @@ import javax.validation.ConstraintViolationException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -37,7 +38,7 @@ import pt.teamloan.ws.response.GenericResponse;
 @RequestScoped
 @Bulkhead
 @Timed
-@Timeout(value = 5000)
+@Timeout(value = 50000)
 public class CompanyPostingsResource {
 	private static final Logger LOGGER = Logger.getLogger(CompanyPostingsResource.class.getName());
 	
@@ -68,6 +69,26 @@ public class CompanyPostingsResource {
 		try {
 			validatePermissionForCompanyUuid(companyUuid, ctx);
 			postingEntity = postingsService.create(companyUuid, postingEntity);
+			return Response.status(Status.CREATED).entity(new GenericResponse(postingEntity.getUuid())).build();
+		} catch (ConstraintViolationException e) {
+			LOGGER.log(Level.WARNING, "Posting constraint validation!", e);
+			return Response.status(Status.BAD_REQUEST).entity(new GenericResponse(e)).build();
+		} catch (ForbiddenException e) {
+			LOGGER.log(Level.WARNING, "Permissions validation!", e);
+			return Response.status(Status.FORBIDDEN).entity(new GenericResponse(e)).build();
+		} catch (Exception e) {
+			LOGGER.log(Level.ERROR, "Unexpected error.", e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new GenericResponse(e)).build();
+		}
+	}
+	
+	@Path("/{postingUuid}")
+	@PATCH
+	@RolesAllowed({RoleConstants.END_USER, RoleConstants.ADMIN})
+	public Response patch(@PathParam("companyUuid") String companyUuid, @PathParam("postingUuid") String postingUuid, PostingEntity postingEntity, @Context SecurityContext ctx) {
+		try {
+			validatePermissionForCompanyUuid(companyUuid, ctx);
+			postingEntity = postingsService.update(companyUuid, postingUuid, postingEntity);
 			return Response.status(Status.CREATED).entity(new GenericResponse(postingEntity.getUuid())).build();
 		} catch (ConstraintViolationException e) {
 			LOGGER.log(Level.WARNING, "Posting constraint validation!", e);

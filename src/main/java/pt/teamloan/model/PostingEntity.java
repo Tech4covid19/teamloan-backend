@@ -84,6 +84,7 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 
 	@OneToMany(mappedBy = "posting", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
 	@JsonbProperty("jobs")
+	@Size(min = 1, max = 100)
 	private List<PostingJobEntity> postingJobs;
 
 	@JsonbTransient

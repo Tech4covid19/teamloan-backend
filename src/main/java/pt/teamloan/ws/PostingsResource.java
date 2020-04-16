@@ -21,7 +21,7 @@ import org.jboss.logmanager.Logger;
 
 import io.quarkus.panache.common.Page;
 import pt.teamloan.authserver.constants.RoleConstants;
-import pt.teamloan.exception.GenericException;
+import pt.teamloan.exception.TeamLoanException;
 import pt.teamloan.model.PostingEntity;
 import pt.teamloan.model.enums.Intent;
 import pt.teamloan.service.PostingsService;
@@ -49,7 +49,7 @@ public class PostingsResource {
 			@QueryParam("page-size") Integer pageSize, @QueryParam("intent") Intent intent,
 			@QueryParam("business-area") String businessAreaUuid, @QueryParam("district") String districtUuid,
 			@QueryParam("municipality") String municipalityUuid, @QueryParam("job") String jobUuid,
-			@Context SecurityContext ctx) throws GenericException {
+			@Context SecurityContext ctx) throws TeamLoanException {
 		
 		Integer effectivePageIndex = pageNumber == null ? 0 : pageNumber - 1;
 		Integer effectivePageSize = pageSize == null ? 10 : pageSize;
