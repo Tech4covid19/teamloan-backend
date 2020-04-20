@@ -1,6 +1,7 @@
 package pt.teamloan.ws;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -57,5 +59,12 @@ public class PostingsResource {
 		
 		return postingsService.findPaged(page, intent, businessAreaUuid, districtUuid, municipalityUuid, jobUuid);
 	}
-
+	
+	@Path("/{uuid}")
+	@GET
+	@RolesAllowed({ RoleConstants.END_USER, RoleConstants.ADMIN })
+	public PostingEntity getByUUID(@PathParam("uuid") String postingUuid,
+			@Context SecurityContext ctx) throws TeamLoanException {
+		return postingsService.findPostingByUuid(postingUuid);
+	}
 }

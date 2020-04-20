@@ -167,6 +167,11 @@ public class PostingsService {
 		foundPosting.persist();
 		return foundPosting;
 	}
+	
+
+	public PostingEntity findPostingByUuid(String postingUuid) {
+		return PostingEntity.find("uuid", UUID.fromString(postingUuid)).singleResult();
+	}
 
 	/**
 	 * This works only with cascadeType = REFRESH. Because only the reference id

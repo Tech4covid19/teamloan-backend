@@ -8,35 +8,28 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logmanager.Level;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.mailer.MailTemplate;
 import io.quarkus.panache.common.Sort;
 import io.quarkus.qute.api.ResourcePath;
+import pt.teamloan.config.MailConfig;
 import pt.teamloan.exception.EntityAlreadyExistsException;
 import pt.teamloan.model.ProspectEntity;
-import pt.teamloan.ws.response.GenericResponse;
 
 @ApplicationScoped
 public class ProspectService {
 	private static final Logger LOGGER = Logger.getLogger(ProspectService.class.getName());
 
-	@ConfigProperty(name = "mail.prospect.subject")
-	String prospectMailSubject;
-
+	@Inject
+	MailConfig mailConfig;
+	
 	@ResourcePath("mails/prospect")
 	MailTemplate prospectMailTemplate;
-
-	@ConfigProperty(name = "mail.prospect-inform.subject")
-	String prospectInformMailSubject;
 
 	@ResourcePath("mails/prospect-inform")
 	MailTemplate prospectInformMailTemplate;
@@ -54,7 +47,7 @@ public class ProspectService {
 
 	private CompletionStage<Void> sendConfirmationEmail(ProspectEntity prospectEntity) {
 		CompletionStage<Void> sendMailCompletionStage = prospectMailTemplate.to(prospectEntity.getEmail())
-				.subject(prospectMailSubject).send();
+				.subject(mailConfig.getProspectMailSubject()).send();
 		return sendMailCompletionStage;
 	}
 
@@ -78,7 +71,7 @@ public class ProspectService {
 		for (String email : validEmails) {
 			LOGGER.info("SENDING EMAIL to: " + email);
 			CompletionStage<Void> sendMailCompletionStage = prospectInformMailTemplate.to(email)
-					.subject(prospectInformMailSubject).send();
+					.replyTo(mailConfig.getReplyTo()).subject(mailConfig.getProspectInformMailSubject()).send();
 			sendMailCompletionStage.thenApply(f -> {
 				LOGGER.info("SUCESS SENDING EMAIL to: " + email);
 				return null;

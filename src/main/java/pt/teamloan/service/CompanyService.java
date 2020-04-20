@@ -12,14 +12,12 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 import io.quarkus.mailer.MailTemplate;
 import io.quarkus.qute.api.ResourcePath;
-import pt.teamloan.authserver.AuthServerException;
 import pt.teamloan.authserver.AuthServerResponse;
 import pt.teamloan.authserver.AuthServerService;
 import pt.teamloan.authserver.AuthServerUser;
+import pt.teamloan.config.MailConfig;
 import pt.teamloan.exception.EntityAlreadyExistsException;
 import pt.teamloan.exception.TeamLoanException;
 import pt.teamloan.model.BusinessAreaEntity;
@@ -29,18 +27,14 @@ import pt.teamloan.utils.UUIDMapper;
 
 @ApplicationScoped
 public class CompanyService {
+	@Inject
+	MailConfig mailConfig;
 	
 	@Inject
 	AuthServerService authServerService;
 	
 	@Inject
 	UUIDMapper uuidMapper;
-	
-	@ConfigProperty(name = "mail.email-verification.subject")
-	String verificationMailSubject;
-	
-	@ConfigProperty(name = "mail.email-verification.link-format")
-	String verificationMailLinkFormat;
 	
 	@ResourcePath("mails/email-verification")
 	MailTemplate verificationEmailTemplate;
@@ -70,7 +64,6 @@ public class CompanyService {
 		return CompletableFuture.completedFuture(null);
 	}
 
-
 	private String setActivationKey(CompanyEntity company) {
 		company.setActivationKey(SecureKeyGenerator.generateUniqueSecureKey());
 		company.setDtActivationKeyExpiresAt(Timestamp.from(Instant.now().plus(3, ChronoUnit.DAYS)));
@@ -90,20 +83,18 @@ public class CompanyService {
 			foundCompany.setActivationKey(null);
 			foundCompany.setDtActivationKeyExpiresAt(null);
 			foundCompany.setEmailVerified(true);
-			//foundCompany.persist();
 		}
 		return foundCompany;
 	}
-
 
 	private boolean isActivationExpired(CompanyEntity foundCompany) {
 		return foundCompany.getDtActivationKeyExpiresAt().before(Timestamp.from(Instant.now()));
 	}
 
 	private CompletionStage<Void> sendVerificationEmail(CompanyEntity companyEntity) {
-		String verificationMailLink = MessageFormat.format(verificationMailLinkFormat, companyEntity.getActivationKey());
-		CompletionStage<Void> sendMailCompletionStage = verificationEmailTemplate.to(companyEntity.getEmail())
-				.subject(verificationMailSubject).data("link", verificationMailLink).send();
+		String verificationMailLink = MessageFormat.format(mailConfig.getVerificationMailLinkFormat(), companyEntity.getActivationKey());
+		CompletionStage<Void> sendMailCompletionStage = verificationEmailTemplate.to(companyEntity.getEmail()).replyTo(mailConfig.getReplyTo())
+				.subject(mailConfig.getVerificationMailSubject()).data("link", verificationMailLink).send();
 		return sendMailCompletionStage;
 	}
 
@@ -117,7 +108,4 @@ public class CompanyService {
 			company.setBusinessArea(businessArea);
 		}
 	}
-
-
-
 }
