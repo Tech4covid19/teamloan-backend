@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolationException;
@@ -23,6 +24,7 @@ import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.jboss.logmanager.Level;
 import org.jboss.logmanager.Logger;
 
+import pt.teamloan.authserver.constants.RoleConstants;
 import pt.teamloan.exception.EntityAlreadyExistsException;
 import pt.teamloan.model.ProspectEntity;
 import pt.teamloan.service.ProspectService;
@@ -34,7 +36,7 @@ import pt.teamloan.ws.response.GenericResponse;
 @RequestScoped
 @Bulkhead
 @Timed
-@Timeout(value = 5000)
+@Timeout(value = 10000)
 public class ProspectsResource {
 	private static final Logger LOGGER = Logger.getLogger(ProspectsResource.class.getName());
 	
@@ -59,6 +61,24 @@ public class ProspectsResource {
 			CompletableFuture<Response> cf = new CompletableFuture<Response>();
 			cf.complete(Response.status(Status.CONFLICT).entity(new GenericResponse(e)).build());
 			return cf;
+		}
+	}
+	
+	@Path("/inform")
+	@POST
+	@Bulkhead(value = 1, waitingTaskQueue = 1)
+	@RolesAllowed(RoleConstants.ADMIN)
+	public Response inform() {
+		try {
+			CompletionStage<Void> sendMailCompletionStage = prospectService.sendInformationEmails();
+			sendMailCompletionStage.exceptionally(f -> {
+				LOGGER.log(Level.ERROR, "Error informing prospects by email!", f);
+				return null;
+			});
+			return Response.accepted().entity(new GenericResponse()).build();
+		} catch (Exception e) {
+			LOGGER.log(Level.ERROR, "Unexpected error!", e);
+			return Response.serverError().entity(new GenericResponse(e)).build();
 		}
 	}
 }
