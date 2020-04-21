@@ -19,8 +19,8 @@ import com.google.common.base.Strings;
 @Provider
 public class HttpLoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 	private static final Logger LOGGER = Logger.getLogger(HttpLoggingFilter.class.getName());
-	private static final String LOG_REQUEST_FORMAT = "Request: {0} {1}\nHeaders: {2}\nPayload: {3}";
-	private static final String LOG_RESPONSE_FORMAT = "Response: {0} {1} | Status: {2}\nHeaders: {3}\n Payload: {4}";
+	private static final String LOG_REQUEST_FORMAT = "Request: {0} {1} | Headers: {2} | Payload: {3}";
+	private static final String LOG_RESPONSE_FORMAT = "Response: {0} {1} - Status: {2} | Headers: {3} | Payload: {4}";
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
