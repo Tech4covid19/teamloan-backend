@@ -14,6 +14,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,8 +27,11 @@ import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.jboss.logmanager.Level;
 import org.jboss.logmanager.Logger;
 
+import io.quarkus.panache.common.Page;
 import pt.teamloan.authserver.constants.RoleConstants;
+import pt.teamloan.exception.TeamLoanException;
 import pt.teamloan.model.PostingEntity;
+import pt.teamloan.model.enums.Intent;
 import pt.teamloan.service.PostingsService;
 import pt.teamloan.utils.SecurityContextUtil;
 import pt.teamloan.ws.response.GenericResponse;
@@ -41,31 +45,41 @@ import pt.teamloan.ws.response.GenericResponse;
 @Timeout(value = 5000)
 public class CompanyPostingsResource {
 	private static final Logger LOGGER = Logger.getLogger(CompanyPostingsResource.class.getName());
-	
+
 	@Inject
 	SecurityContextUtil securityContextUtil;
-	
+
 	@Inject
 	PostingsService postingsService;
-	
+
 	@GET
-	@RolesAllowed({RoleConstants.END_USER, RoleConstants.ADMIN})
-	public List<PostingEntity> get(@PathParam("companyUuid") String companyUuid, @Context SecurityContext ctx) {
+	@RolesAllowed({ RoleConstants.END_USER, RoleConstants.ADMIN })
+	public List<PostingEntity> get(@PathParam("companyUuid") String companyUuid,
+			@QueryParam("page-number") Integer pageNumber, @QueryParam("page-size") Integer pageSize,
+			@QueryParam("intent") Intent intent, @QueryParam("business-area") String businessAreaUuid,
+			@QueryParam("district") String districtUuid, @QueryParam("municipality") String municipalityUuid,
+			@QueryParam("job") String jobUuid, @Context SecurityContext ctx) throws TeamLoanException {
 		validatePermissionForCompanyUuid(companyUuid, ctx);
-		return postingsService.listAllForCompany(companyUuid);
+		Integer effectivePageIndex = pageNumber == null ? 0 : pageNumber - 1;
+		Integer effectivePageSize = pageSize == null ? 10 : pageSize;
+		Page page = Page.of(effectivePageIndex, effectivePageSize);
+
+		return postingsService.findPaged(page, intent, null, businessAreaUuid, districtUuid, municipalityUuid, jobUuid);
 	}
-	
+
 	@GET
 	@Path("/{postingUuid}")
-	@RolesAllowed({RoleConstants.END_USER, RoleConstants.ADMIN})
-	public PostingEntity getByUuid(@PathParam("companyUuid") String companyUuid, @PathParam("postingUuid") String postingUuid, @Context SecurityContext ctx) {
+	@RolesAllowed({ RoleConstants.END_USER, RoleConstants.ADMIN })
+	public PostingEntity getByUuid(@PathParam("companyUuid") String companyUuid,
+			@PathParam("postingUuid") String postingUuid, @Context SecurityContext ctx) {
 		validatePermissionForCompanyUuid(companyUuid, ctx);
 		return postingsService.findCompanyPosting(companyUuid, postingUuid);
 	}
-	
+
 	@POST
-	@RolesAllowed({RoleConstants.END_USER, RoleConstants.ADMIN})
-	public Response post(@PathParam("companyUuid") String companyUuid, PostingEntity postingEntity, @Context SecurityContext ctx) {
+	@RolesAllowed({ RoleConstants.END_USER, RoleConstants.ADMIN })
+	public Response post(@PathParam("companyUuid") String companyUuid, PostingEntity postingEntity,
+			@Context SecurityContext ctx) {
 		try {
 			validatePermissionForCompanyUuid(companyUuid, ctx);
 			postingEntity = postingsService.create(companyUuid, postingEntity);
@@ -81,11 +95,12 @@ public class CompanyPostingsResource {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new GenericResponse(e)).build();
 		}
 	}
-	
+
 	@Path("/{postingUuid}")
 	@PATCH
-	@RolesAllowed({RoleConstants.END_USER, RoleConstants.ADMIN})
-	public Response patch(@PathParam("companyUuid") String companyUuid, @PathParam("postingUuid") String postingUuid, PostingEntity postingEntity, @Context SecurityContext ctx) {
+	@RolesAllowed({ RoleConstants.END_USER, RoleConstants.ADMIN })
+	public Response patch(@PathParam("companyUuid") String companyUuid, @PathParam("postingUuid") String postingUuid,
+			PostingEntity postingEntity, @Context SecurityContext ctx) {
 		try {
 			validatePermissionForCompanyUuid(companyUuid, ctx);
 			postingEntity = postingsService.update(companyUuid, postingUuid, postingEntity);
@@ -104,8 +119,9 @@ public class CompanyPostingsResource {
 
 	private void validatePermissionForCompanyUuid(String companyUuid, SecurityContext ctx) {
 		String companyUuidFromSecurityCtx = securityContextUtil.getCompanyUuid(ctx);
-		if(!companyUuidFromSecurityCtx.equals(companyUuid)) {
-			throw new ForbiddenException("The user can only access is own resources! It is trying to do something on another user resource.");
+		if (!companyUuidFromSecurityCtx.equals(companyUuid)) {
+			throw new ForbiddenException(
+					"The user can only access is own resources! It is trying to do something on another user resource.");
 		}
 	}
 

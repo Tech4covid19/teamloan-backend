@@ -57,7 +57,7 @@ public class PostingsResource {
 		Integer effectivePageSize = pageSize == null ? 10 : pageSize;
 		Page page = Page.of(effectivePageIndex, effectivePageSize);
 		
-		return postingsService.findPaged(page, intent, businessAreaUuid, districtUuid, municipalityUuid, jobUuid);
+		return postingsService.findPaged(page, intent, null, businessAreaUuid, districtUuid, municipalityUuid, jobUuid);
 	}
 	
 	@Path("/{uuid}")

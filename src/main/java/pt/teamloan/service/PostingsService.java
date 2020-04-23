@@ -42,6 +42,7 @@ public class PostingsService {
 			+ "JOIN FETCH p.company c "
 			+ "JOIN FETCH c.businessArea ca "
 			+ "WHERE p.intent = :intent "
+			+ "AND (c.id = :companyId OR :companyId IS NULL) "
 			+ "AND (d.id = :districtId OR :districtId IS NULL) "
 			+ "AND (m.id = :municipalityId OR :municipalityId IS NULL) "
 			+ "AND (ca.id = :businessAreaId OR :businessAreaId IS NULL) "
@@ -50,7 +51,7 @@ public class PostingsService {
 	@Inject
 	UUIDMapper uuidMapper;
 
-	public List<PostingEntity> findPaged(Page page, Intent intent, String businessAreaUuid, String districtUuid,
+	public List<PostingEntity> findPaged(Page page, Intent intent, String companyUuid, String businessAreaUuid, String districtUuid,
 			String municipalityUuid, String jobUuid) throws TeamLoanException {
 
 		Parameters parameters = Parameters.with("intent", intent);
@@ -63,6 +64,14 @@ public class PostingsService {
 			parameters.and("districtId", null);
 		}
 
+		// Optional company filter
+		if (!Strings.isNullOrEmpty(companyUuid)) {
+			Integer companyId = uuidMapper.mapToId(companyUuid, CompanyEntity.class);
+			parameters.and("companyId", companyId);
+		} else {
+			parameters.and("companyId", null);
+		}
+		
 		// Optional municipality filter
 		if (!Strings.isNullOrEmpty(municipalityUuid)) {
 			Integer municipalityId = uuidMapper.mapToId(municipalityUuid, MunicipalityEntity.class);
