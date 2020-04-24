@@ -64,7 +64,7 @@ public class CompanyPostingsResource {
 		Integer effectivePageSize = pageSize == null ? 10 : pageSize;
 		Page page = Page.of(effectivePageIndex, effectivePageSize);
 
-		return postingsService.findPaged(page, intent, null, businessAreaUuid, districtUuid, municipalityUuid, jobUuid);
+		return postingsService.findPaged(page, intent, companyUuid, businessAreaUuid, districtUuid, municipalityUuid, jobUuid);
 	}
 
 	@GET
