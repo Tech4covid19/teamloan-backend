@@ -99,7 +99,7 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 	@JoinColumn(name = "id_municipality")
 	private MunicipalityEntity municipality;
 
-	@Size(min = 1, max = 4000)
+	@Size(max = 4000)
 	private String notes;
 
 	public PostingEntity() {
