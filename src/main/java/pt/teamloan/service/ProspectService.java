@@ -3,6 +3,9 @@ package pt.teamloan.service;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,6 +15,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.jboss.logmanager.Level;
 
 import io.quarkus.mailer.MailTemplate;
@@ -23,6 +27,8 @@ import pt.teamloan.model.ProspectEntity;
 
 @ApplicationScoped
 public class ProspectService {
+	private static final int MINIMUM_INTERVAL_BETEEN_EMAILS = 3;
+
 	private static final Logger LOGGER = Logger.getLogger(ProspectService.class.getName());
 
 	@Inject
@@ -67,22 +73,40 @@ public class ProspectService {
 		// Normalize and remove duplicates
 		List<String> validEmails = prospectValidEmailsStream.map(p -> p.getEmail().toLowerCase()).distinct()
 				.collect(Collectors.toList());
-
+		
+		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+		int delayMinutes = 0;
 		for (String email : validEmails) {
-			LOGGER.info("SENDING EMAIL to: " + email);
-			CompletionStage<Void> sendMailCompletionStage = prospectInformMailTemplate.to(email)
-					.replyTo(mailConfig.getReplyTo()).subject(mailConfig.getProspectInformMailSubject()).send();
-			sendMailCompletionStage.thenApply(f -> {
-				LOGGER.info("SUCESS SENDING EMAIL to: " + email);
-				return null;
-			});
-			sendMailCompletionStage.exceptionally(f -> {
-				LOGGER.log(Level.ERROR, "ERROR SENDING EMAIL to: " + email);
-				return null;
-			});
+			int jitter = (int) Math.floor((Math.random() * 3d));
+			delayMinutes += MINIMUM_INTERVAL_BETEEN_EMAILS + jitter;
+			scheduler.schedule(createSendInformMailRunnable(email), delayMinutes, TimeUnit.MINUTES);
 		}
 		CompletableFuture<Void> cf = new CompletableFuture<Void>();
 		cf.complete(null);
 		return cf;
+	}
+
+	@Counted(name = "sentProspectInformMail", description = "How many mails have been sent to prospects.")
+    public void sendProspectInformMail(String email) {
+		LOGGER.info("SENDING EMAIL to: " + email);
+		CompletionStage<Void> sendMailCompletionStage = prospectInformMailTemplate.to(email)
+				.replyTo(mailConfig.getReplyTo()).subject(mailConfig.getProspectInformMailSubject()).send();
+		sendMailCompletionStage.thenApply(f -> {
+			LOGGER.info("SUCESS SENDING EMAIL to: " + email);
+			return null;
+		});
+		sendMailCompletionStage.exceptionally(f -> {
+			LOGGER.log(Level.ERROR, "ERROR SENDING EMAIL to: " + email);
+			return null;
+		});
+	}
+	
+	private Runnable createSendInformMailRunnable(String email) {
+		return new Runnable() {
+			@Override
+			public void run() {
+				sendProspectInformMail(email);
+			}
+		};
 	}
 }
