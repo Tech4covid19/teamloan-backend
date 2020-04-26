@@ -18,6 +18,15 @@ public class MailConfig {
 
 	@ConfigProperty(name = "mail.prospect-inform.subject")
 	String prospectInformMailSubject;
+	
+	@ConfigProperty(name = "mail.metrics.enabled", defaultValue = "true")
+	Boolean metricsEnabled;
+
+	@ConfigProperty(name = "mail.metrics.subject")
+	String metricsSubject;
+
+	@ConfigProperty(name = "mail.metrics.to")
+	String metricsTo;
 
 	@ConfigProperty(name = "mail.reply-to")
 	String replyTo;
@@ -36,6 +45,18 @@ public class MailConfig {
 
 	public String getProspectInformMailSubject() {
 		return prospectInformMailSubject;
+	}
+
+	public Boolean getMetricsEnabled() {
+		return metricsEnabled;
+	}
+
+	public String getMetricsSubject() {
+		return metricsSubject;
+	}
+
+	public String getMetricsTo() {
+		return metricsTo;
 	}
 
 	public String getReplyTo() {

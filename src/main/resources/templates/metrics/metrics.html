@@ -1,61 +1,78 @@
-<!DOCTYPE html>
-<html>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Relatório de métricas TeamLoan</title>
-    <style>
-        body {
-            font-family: arial, sans-serif;
-            text-align: center;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        td,
-        th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #dddddd;
-        }
-
-
-        .total{
-            background-color: #00b35a;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
-
-<body>
-    <h1>Relatório de métricas TeamLoan</h1>
-    <div class="report">
-        <h2>Registos por sector e objectivo</h2>
-        <table style="width:100%">
-            <tr>
-                <th>Sector</th>
-                <th>Objectivo</th>
-                <th>Total</th>
-            </tr>
-            {#for metric in metrics} 
-            <tr>
-                <td>{metric.businessArea}</td>
-                <td>{metric.intent}</td>
-                <td>{metric.total}</td>
-            </tr>
-            {/for}
-            <tr>
-                <td>-</td>
-                <td>-</td>
-                <td class="total">{totalRegistrations}</td>
-            </tr>
-      </table>
-    </div>
+<body style="margin: 0; padding: 0;">
+	<table border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tr>
+			<td style="padding: 10px 0 30px 0;">
+				<table align="center" border="0" cellpadding="0" cellspacing="0"
+					style="display: block; width: 587px; background: #ffffff; border: 1px solid #663366;">
+					<tr>
+						<td align="center"><img
+							src="https://teamloan.pt/template-resources/mail-header-joined.jpg"
+							alt="Team Loan" style="display: block;" /></td>
+					</tr>
+					<tr>
+						<td bgcolor="#ffffff" style="padding: 40px 30px 40px 30px;">
+							<table border="0" cellpadding="0" cellspacing="0" width="100%">
+								<tr>
+									<td>
+										<h1 style="text-align: center; font-family: Work Sans; font-style: normal; font-weight: bold; font-size: 20px; line-height: 23px; text-transform: uppercase; color: #663366;">Relatório de métricas TeamLoan</h1>
+									</td>
+								</tr>
+								<tr>
+									<td
+										style="padding: 20px 0 30px 0; color: #153643; font-family: Work Sans; font-style: normal; font-weight: normal; font-size: 16px; line-height: 20px; text-align: justify; color: #000000;">
+                                        <div class="report">
+                                            <h2 style="text-align: center; font-family: Work Sans; font-style: normal; font-weight: normal; font-size: 18px; line-height: 21px; text-transform: uppercase; color: #663366;">Registos por sector e objectivo</h2>
+                                            <table style="width:100%; border-collapse: collapse;">
+                                                <tr>
+                                                    <th style="border: 1px solid #dddddd; text-align: center; padding: 8px; font-family: Work Sans; font-style: normal; font-weight: normal; text-transform: uppercase; color: #663366;">Sector</th>
+                                                    <th style="border: 1px solid #dddddd; text-align: center; padding: 8px; font-family: Work Sans; font-style: normal; font-weight: normal; text-transform: uppercase; color: #663366;">Objectivo</th>
+                                                    <th style="border: 1px solid #dddddd; text-align: center; padding: 8px; font-family: Work Sans; font-style: normal; font-weight: normal; text-transform: uppercase; color: #663366;">Total</th>
+                                                </tr>
+                                                {#for metric in metrics} 
+                                                <tr>
+                                                    <td style="border: 1px solid #dddddd; text-align: left; padding: 8px; font-family: Work Sans; font-style: normal; font-weight: normal;">{metric.businessArea}</td>
+                                                    <td style="border: 1px solid #dddddd; text-align: left; padding: 8px; font-family: Work Sans; font-style: normal; font-weight: normal;">{metric.intent}</td>
+                                                    <td style="border: 1px solid #dddddd; text-align: left; padding: 8px; font-family: Work Sans; font-style: normal; font-weight: normal;">{metric.total}</td>
+                                                </tr>
+                                                {/for}
+                                                <tr>
+                                                    <td style="border: 1px solid #dddddd; text-align: left; padding: 8px; color: #dddddd; background-color: #825A73;"></td>
+                                                    <td style="border: 1px solid #dddddd; text-align: left; padding: 8px; color: #dddddd; background-color: #825A73;"></td>
+                                                    <td style="border: 1px solid #dddddd; text-align: left; padding: 8px; color: #dddddd; background-color: #825A73;">{totalRegistrations}</td>
+                                                </tr>
+                                          </table>
+                                        </div>
+										<br />
+										<br />
+										<div align="center"><b>Equipa TeamLoan</b></div>
+                                        <div align="center"><a href="https://www.teamloan.pt">teamloan.pt</a></div>
+                                        <div align="center"><a href="mailto:geral@teamloan.pt">geral@teamloan.pt</a></div>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td bgcolor="#333333" style="padding: 30px 30px 30px 30px;">
+							<a href="https://tech4covid19.org/"><img
+								id="mail-footer-logo"
+								src="https://teamloan.pt/template-resources/logo-tech4covid19.png"
+								style="display: block; float: right; width: 97px; height: 36px; box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); margin-right: 125px;" /></a>
+							<span id="mail-footer-text"
+							style="display: block; float: right; width: 184px; height: 12px; font-style: normal; font-weight: normal; font-size: 11px; line-height: 25px; text-align: right; color: #ffffff; margin-right: 50px;">Uma
+								iniciativa no âmbito do projecto:</span>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
 </body>
 </html>

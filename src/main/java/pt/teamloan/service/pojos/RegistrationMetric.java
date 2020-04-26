@@ -1,4 +1,4 @@
-package pt.teamloan.service.metrics;
+package pt.teamloan.service.pojos;
 
 import pt.teamloan.model.enums.Intent;
 
