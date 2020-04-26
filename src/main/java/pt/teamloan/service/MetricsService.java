@@ -35,6 +35,7 @@ public class MetricsService {
             + //
             "FROM CompanyEntity c\n" + //
             "JOIN c.businessArea ba\n" + //
+            "WHERE c.name NOT LIKE '[TEAMLOAN-TEST]'\n" + // to filter test accounts
             "GROUP BY ba.name, c.intent";
 
     public List<RegistrationMetric> getRegistrationMetrics() {
@@ -55,7 +56,7 @@ public class MetricsService {
 
     @Scheduled(cron = "0 0 18 * * ?")
     public void sendMetricsMail() {
-        if(mailConfig.getMetricsEnabled()){
+        if (mailConfig.getMetricsEnabled()) {
             mailer.send(Mail.withHtml(mailConfig.getMetricsTo(), mailConfig.getMetricsSubject(), getInHtml().render()));
         }
     }

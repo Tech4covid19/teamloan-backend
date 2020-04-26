@@ -30,6 +30,7 @@ import pt.teamloan.authserver.constants.RoleConstants;
 public class PropertiesResource {
 
 	private static final String FILTER_PASSWORD_KEYWORD = "password";
+	private static final String FILTER_SECRET_KEYWORD = "secret";
 
 	@GET
 	@RolesAllowed(RoleConstants.ADMIN)
@@ -38,7 +39,7 @@ public class PropertiesResource {
 		Config config = ConfigProviderResolver.instance().getConfig();
 		for (String propName : config.getPropertyNames()) {
 			try {
-				if(!propName.toLowerCase().contains(FILTER_PASSWORD_KEYWORD)) {
+				if(!propName.toLowerCase().contains(FILTER_PASSWORD_KEYWORD) && !propName.toLowerCase().contains(FILTER_SECRET_KEYWORD)) {
 					props.put(propName, config.getValue(propName, String.class));
 				}
 			} catch (Exception e) {
