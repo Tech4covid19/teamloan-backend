@@ -53,7 +53,7 @@ public class MetricsService {
         return metricsTemplate.data("metrics", registrationMetrics).data("totalRegistrations", totalRegistrations);
     }
 
-    @Scheduled(cron = "0 0 19 * * ?")
+    @Scheduled(cron = "0 0 18 * * ?")
     public void sendMetricsMail() {
         if(mailConfig.getMetricsEnabled()){
             mailer.send(Mail.withHtml(mailConfig.getMetricsTo(), mailConfig.getMetricsSubject(), getInHtml().render()));
