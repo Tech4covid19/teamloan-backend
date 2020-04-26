@@ -27,12 +27,12 @@ import pt.teamloan.authserver.constants.RoleConstants;
 @Bulkhead
 @Timed
 @Timeout(value = 5000)
-@RolesAllowed(RoleConstants.ADMIN)
 public class PropertiesResource {
 
 	private static final String FILTER_PASSWORD_KEYWORD = "password";
 
 	@GET
+	@RolesAllowed(RoleConstants.ADMIN)
 	public Map<String,String> get() {
 		Map<String, String> props = new HashMap();
 		Config config = ConfigProviderResolver.instance().getConfig();
