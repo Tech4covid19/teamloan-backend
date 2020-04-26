@@ -41,7 +41,7 @@ public class PostingsService {
 			+ "JOIN FETCH pj.job pjj "
 			+ "JOIN FETCH p.company c "
 			+ "JOIN FETCH c.businessArea ca "
-			+ "WHERE p.intent = :intent "
+			+ "WHERE (p.intent = :intent OR :intent IS NULL) "
 			+ "AND (c.id = :companyId OR :companyId IS NULL) "
 			+ "AND (d.id = :districtId OR :districtId IS NULL) "
 			+ "AND (m.id = :municipalityId OR :municipalityId IS NULL) "
