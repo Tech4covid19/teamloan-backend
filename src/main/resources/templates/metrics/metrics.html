@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de métricas TeamLoan</title>
+    <style>
+        body {
+            font-family: arial, sans-serif;
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+
+        .total{
+            background-color: #00b35a;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Relatório de métricas TeamLoan</h1>
+    <div class="report">
+        <h2>Registos por sector e objectivo</h2>
+        <table style="width:100%">
+            <tr>
+                <th>Sector</th>
+                <th>Objectivo</th>
+                <th>Total</th>
+            </tr>
+            {#for metric in metrics} 
+            <tr>
+                <td>{metric.businessArea}</td>
+                <td>{metric.intent}</td>
+                <td>{metric.total}</td>
+            </tr>
+            {/for}
+            <tr>
+                <td>-</td>
+                <td>-</td>
+                <td class="total">{totalRegistrations}</td>
+            </tr>
+      </table>
+    </div>
+</body>
+</html>

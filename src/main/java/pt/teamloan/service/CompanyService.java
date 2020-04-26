@@ -69,8 +69,7 @@ public class CompanyService {
 		company.setDtActivationKeyExpiresAt(Timestamp.from(Instant.now().plus(3, ChronoUnit.DAYS)));
 		return company.getActivationKey();
 	}
-	
-	
+
 	public CompanyEntity getByUUID(String uuid) {
 		return CompanyEntity.find("uuid", UUID.fromString(uuid)).singleResult();
 	}
