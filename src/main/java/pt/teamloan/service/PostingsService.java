@@ -34,15 +34,10 @@ import pt.teamloan.utils.UUIDMapper;
 public class PostingsService {
 	private static final Logger LOGGER = Logger.getLogger(PostingsService.class.getName());
 
-	private static final String LIST_QUERY_WITH_PARAMETERS = "FROM PostingEntity p "
-			+ "JOIN FETCH p.district d "
-			+ "JOIN FETCH p.municipality m "
-			+ "JOIN FETCH p.postingJobs pj "
-			+ "JOIN FETCH pj.job pjj "
-			+ "JOIN FETCH p.company c "
-			+ "JOIN FETCH c.businessArea ca "
-			+ "WHERE (p.intent = :intent OR :intent IS NULL) "
-			+ "AND (c.id = :companyId OR :companyId IS NULL) "
+	private static final String LIST_QUERY_WITH_PARAMETERS = "FROM PostingEntity p " + "JOIN FETCH p.district d "
+			+ "JOIN FETCH p.municipality m " + "JOIN FETCH p.postingJobs pj " + "JOIN FETCH pj.job pjj "
+			+ "JOIN FETCH p.company c " + "JOIN FETCH c.businessArea ca "
+			+ "WHERE (p.intent = :intent OR :intent IS NULL) " + "AND (c.id = :companyId OR :companyId IS NULL) "
 			+ "AND (d.id = :districtId OR :districtId IS NULL) "
 			+ "AND (m.id = :municipalityId OR :municipalityId IS NULL) "
 			+ "AND (ca.id = :businessAreaId OR :businessAreaId IS NULL) "
@@ -51,8 +46,8 @@ public class PostingsService {
 	@Inject
 	UUIDMapper uuidMapper;
 
-	public List<PostingEntity> findPaged(Page page, Intent intent, String companyUuid, String businessAreaUuid, String districtUuid,
-			String municipalityUuid, String jobUuid) throws TeamLoanException {
+	public List<PostingEntity> findPaged(Page page, Intent intent, String companyUuid, String businessAreaUuid,
+			String districtUuid, String municipalityUuid, String jobUuid) throws TeamLoanException {
 
 		Parameters parameters = Parameters.with("intent", intent);
 
@@ -71,7 +66,7 @@ public class PostingsService {
 		} else {
 			parameters.and("companyId", null);
 		}
-		
+
 		// Optional municipality filter
 		if (!Strings.isNullOrEmpty(municipalityUuid)) {
 			Integer municipalityId = uuidMapper.mapToId(municipalityUuid, MunicipalityEntity.class);
@@ -163,7 +158,8 @@ public class PostingsService {
 			foundPosting.persist();
 			return foundPosting;
 		} else {
-			TeamLoanException tlException = new TeamLoanException("Unexisting posting for company uuid: '{0}' and posting uuid: '{1}'", companyUuid, postingUuid);
+			TeamLoanException tlException = new TeamLoanException(
+					"Unexisting posting for company uuid: '{0}' and posting uuid: '{1}'", companyUuid, postingUuid);
 			LOGGER.log(Level.ERROR, tlException.getMessage());
 			throw tlException;
 		}
@@ -172,11 +168,15 @@ public class PostingsService {
 	@Transactional
 	public PostingEntity delete(String companyUuid, String postingUuid) {
 		PostingEntity foundPosting = findCompanyPosting(companyUuid, postingUuid);
+		if (foundPosting.getPostingJobs() != null && !foundPosting.getPostingJobs().isEmpty()) {
+			for (PostingJobEntity posting : foundPosting.getPostingJobs()) {
+				posting.setFlDeleted(true);
+			}
+		}
 		foundPosting.setFlDeleted(true);
 		foundPosting.persist();
 		return foundPosting;
 	}
-	
 
 	public PostingEntity findPostingByUuid(String postingUuid) {
 		return PostingEntity.find("uuid", UUID.fromString(postingUuid)).singleResult();
