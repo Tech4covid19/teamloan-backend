@@ -1,12 +1,14 @@
 package pt.teamloan.config;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 public class MailConfig {
-	
+
 	@ConfigProperty(name = "mail.email-verification.subject")
 	String verificationMailSubject;
 
@@ -18,7 +20,7 @@ public class MailConfig {
 
 	@ConfigProperty(name = "mail.prospect-inform.subject")
 	String prospectInformMailSubject;
-	
+
 	@ConfigProperty(name = "mail.metrics.enabled", defaultValue = "true")
 	Boolean metricsEnabled;
 
@@ -26,7 +28,7 @@ public class MailConfig {
 	String metricsSubject;
 
 	@ConfigProperty(name = "mail.metrics.to")
-	String metricsTo;
+	List<String> metricsTo;
 
 	@ConfigProperty(name = "mail.reply-to")
 	String replyTo;
@@ -55,7 +57,7 @@ public class MailConfig {
 		return metricsSubject;
 	}
 
-	public String getMetricsTo() {
+	public List<String> getMetricsTo() {
 		return metricsTo;
 	}
 

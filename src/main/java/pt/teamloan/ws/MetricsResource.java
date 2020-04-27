@@ -15,7 +15,6 @@ import org.jboss.logmanager.Logger;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import io.quarkus.qute.api.ResourcePath;
-import pt.teamloan.service.CompanyService;
 import pt.teamloan.service.MetricsService;
 
 @Path("/metrics")
@@ -31,9 +30,6 @@ public class MetricsResource {
 
 	@Inject
 	MetricsService metricsService;
-
-	@Inject
-	CompanyService companyService;
 
 	@GET
 	@Produces(MediaType.TEXT_HTML)

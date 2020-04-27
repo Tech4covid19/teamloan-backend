@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.jboss.logmanager.Logger;
+
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
 import io.quarkus.qute.Template;
@@ -18,6 +20,8 @@ import pt.teamloan.service.pojos.RegistrationMetric;
 
 @ApplicationScoped
 public class MetricsService {
+
+    private static final Logger LOGGER = Logger.getLogger(MetricsService.class.getName());
 
     @ResourcePath("metrics/metrics")
     Template metricsTemplate;
@@ -57,7 +61,10 @@ public class MetricsService {
     @Scheduled(cron = "0 0 18 * * ?")
     public void sendMetricsMail() {
         if (mailConfig.getMetricsEnabled()) {
-            mailer.send(Mail.withHtml(mailConfig.getMetricsTo(), mailConfig.getMetricsSubject(), getInHtml().render()));
+            LOGGER.info("Running job to send registration metrics by email to: " + mailConfig.getMetricsTo());
+            Mail mail = Mail.withHtml(null, mailConfig.getMetricsSubject(), getInHtml().render());
+            mail.setTo(mailConfig.getMetricsTo());
+            mailer.send();
         }
     }
 }
