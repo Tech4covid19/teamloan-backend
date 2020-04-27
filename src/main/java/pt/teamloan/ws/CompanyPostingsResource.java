@@ -5,8 +5,10 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
@@ -111,6 +113,24 @@ public class CompanyPostingsResource {
 		} catch (ForbiddenException e) {
 			LOGGER.log(Level.WARNING, "Permissions validation!", e);
 			return Response.status(Status.FORBIDDEN).entity(new GenericResponse(e)).build();
+		} catch (Exception e) {
+			LOGGER.log(Level.ERROR, "Unexpected error.", e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new GenericResponse(e)).build();
+		}
+	}
+
+	@Path("/{postingUuid}")
+	@DELETE
+	@RolesAllowed({ RoleConstants.END_USER, RoleConstants.ADMIN })
+	public Response delete(@PathParam("companyUuid") String companyUuid, @PathParam("postingUuid") String postingUuid, @Context SecurityContext ctx) {
+		try {
+			validatePermissionForCompanyUuid(companyUuid, ctx);
+			PostingEntity deletedPosting = postingsService.delete(companyUuid, postingUuid);
+			return Response.status(Status.CREATED).entity(new GenericResponse(deletedPosting.getUuid())).build();
+		} catch (NoResultException e) {
+			TeamLoanException tlException = new TeamLoanException("Couldn''t find posting {0} for company {1}.", e, postingUuid, companyUuid);
+			LOGGER.log(Level.WARNING, tlException.getMessage(), tlException);
+			return Response.status(Status.BAD_REQUEST).entity(new GenericResponse(tlException)).build();
 		} catch (Exception e) {
 			LOGGER.log(Level.ERROR, "Unexpected error.", e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(new GenericResponse(e)).build();

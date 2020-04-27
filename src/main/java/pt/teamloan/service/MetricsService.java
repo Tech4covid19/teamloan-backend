@@ -35,7 +35,7 @@ public class MetricsService {
             + //
             "FROM CompanyEntity c\n" + //
             "JOIN c.businessArea ba\n" + //
-            "WHERE c.name NOT LIKE '[TEAMLOAN-TEST]'\n" + // to filter test accounts
+            "WHERE c.name NOT LIKE '%[TEAMLOAN-TEST]%'\n" + // to filter test accounts
             "GROUP BY ba.name, c.intent";
 
     public List<RegistrationMetric> getRegistrationMetrics() {
