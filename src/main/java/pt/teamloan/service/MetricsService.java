@@ -64,7 +64,7 @@ public class MetricsService {
             LOGGER.info("Running job to send registration metrics by email to: " + mailConfig.getMetricsTo());
             Mail mail = Mail.withHtml(null, mailConfig.getMetricsSubject(), getInHtml().render());
             mail.setTo(mailConfig.getMetricsTo());
-            mailer.send();
+            mailer.send(mail);
         }
     }
 }
