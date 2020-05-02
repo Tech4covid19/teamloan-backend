@@ -27,7 +27,7 @@ jobs:
           username: ${{ secrets.docker_user }}
           password: ${{ secrets.docker_password }}
       - name: Docker push
-        run: docker push teamloan/teamloan-backend:env
+        run: docker push teamloan/teamloan-backend:dev
   deploy:
     needs: build
     runs-on: [ubuntu-18.04]
