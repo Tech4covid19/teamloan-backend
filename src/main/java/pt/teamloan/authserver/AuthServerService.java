@@ -36,5 +36,5 @@ public interface AuthServerService {
      * @param password new password
      * @throws AuthServerException AuthServerException
      */
-    public void resetPassword(String userId, String password) throws AuthServerException;;
+    public void resetPassword(String userId, String password) throws AuthServerException;
 }
