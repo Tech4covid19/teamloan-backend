@@ -28,4 +28,13 @@ public interface AuthServerService {
      */
 	public AuthServerResponse updateEmailToVerified(String subjectUuid) throws AuthServerException;
 
+    /**
+     * Changes the user password
+     * 
+     * @param realm realm
+     * @param userId userId
+     * @param password new password
+     * @throws AuthServerException AuthServerException
+     */
+    public void resetPassword(String userId, String password) throws AuthServerException;;
 }
