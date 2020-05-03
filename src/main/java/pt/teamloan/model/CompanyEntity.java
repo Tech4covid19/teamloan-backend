@@ -2,7 +2,6 @@ package pt.teamloan.model;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.UUID;
 
 import javax.json.bind.annotation.JsonbProperty;
@@ -18,7 +17,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -112,6 +110,14 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable, UU
 
 	@Column(name = "fl_email_verified")
 	private boolean emailVerified = false;
+
+	@JsonbTransient
+	@Column(name = "reset_pass_key")
+	private String resetPasswordKey;
+
+	@JsonbTransient
+	@Column(name = "dt_reset_pass_key_expires_at")
+	private Timestamp dtResetPasswordKeyExpiresAt;
 
 	public CompanyEntity() {
 	}
@@ -253,6 +259,22 @@ public class CompanyEntity extends PanacheEntityBase implements Serializable, UU
 
 	public void setEmailVerified(boolean emailVerified) {
 		this.emailVerified = emailVerified;
+	}
+
+	public String getResetPasswordKey() {
+		return resetPasswordKey;
+	}
+
+	public void setResetPasswordKey(String resetPasswordKey) {
+		this.resetPasswordKey = resetPasswordKey;
+	}
+
+	public Timestamp getDtResetPasswordKeyExpiresAt() {
+		return dtResetPasswordKeyExpiresAt;
+	}
+
+	public void setDtResetPasswordKeyExpiresAt(Timestamp dtResetPasswordKeyExpiresAt) {
+		this.dtResetPasswordKeyExpiresAt = dtResetPasswordKeyExpiresAt;
 	}
 
 }

@@ -97,6 +97,13 @@ public class KeycloakServiceImpl implements AuthServerService {
 		return new AuthServerResponse(userRepresentation.getId());
 	}
 
+	@Override
+	@Retry(maxRetries = 3, delay = 500, delayUnit = ChronoUnit.MILLIS)
+	public void resetPassword(String userId, String password) {
+        CredentialRepresentation passwordCredential = buildPasswordCredentialRepresentation(password);
+        keycloak.realm(realm).users().get(userId).resetPassword(passwordCredential);
+    }
+
 	@Retry(maxRetries = 3, delay = 500, delayUnit = ChronoUnit.MILLIS)
 	protected String executeCreateUserRequest(UserRepresentation userRepresentation, UsersResource usersResource) {
 		Response response = usersResource.create(userRepresentation);
@@ -138,6 +145,14 @@ public class KeycloakServiceImpl implements AuthServerService {
 		userRepresentation.setCredentials(Arrays.asList(passwordCred));
 		return userRepresentation;
 	}
+
+	private CredentialRepresentation buildPasswordCredentialRepresentation(String password) {
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(password);
+        credential.setTemporary(false);
+        return credential;
+    }
 
 	private Keycloak initKeycloakAdminClient() {
 		if (this.keycloak == null) {

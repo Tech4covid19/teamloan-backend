@@ -15,6 +15,12 @@ public class MailConfig {
 	@ConfigProperty(name = "mail.email-verification.link-format")
 	String verificationMailLinkFormat;
 
+	@ConfigProperty(name = "mail.forgot-password.subject")
+	String forgotPasswordMailSubject;
+
+	@ConfigProperty(name = "mail.forgot-password.link-format")
+	String forgotPasswordMailLinkFormat;
+
 	@ConfigProperty(name = "mail.prospect.subject")
 	String prospectMailSubject;
 
@@ -63,6 +69,22 @@ public class MailConfig {
 
 	public String getReplyTo() {
 		return replyTo;
+	}
+
+	public String getForgotPasswordMailSubject() {
+		return forgotPasswordMailSubject;
+	}
+
+	public void setForgotPasswordMailSubject(String forgotPasswordMailSubject) {
+		this.forgotPasswordMailSubject = forgotPasswordMailSubject;
+	}
+
+	public String getForgotPasswordMailLinkFormat() {
+		return forgotPasswordMailLinkFormat;
+	}
+
+	public void setForgotPasswordMailLinkFormat(String forgotPasswordMailLinkFormat) {
+		this.forgotPasswordMailLinkFormat = forgotPasswordMailLinkFormat;
 	}
 
 }

@@ -35,6 +35,8 @@ import pt.teamloan.authserver.constants.RoleConstants;
 import pt.teamloan.exception.EntityAlreadyExistsException;
 import pt.teamloan.model.CompanyEntity;
 import pt.teamloan.service.CompanyService;
+import pt.teamloan.ws.request.ForgotPasswordRequest;
+import pt.teamloan.ws.request.ResetPasswordRequest;
 import pt.teamloan.ws.response.GenericResponse;
 
 @Path("/company")
@@ -46,7 +48,7 @@ import pt.teamloan.ws.response.GenericResponse;
 @Timeout(value = 5000)
 public class CompaniesResource {
 	private static final Logger LOGGER = Logger.getLogger(CompaniesResource.class.getName());
-	
+
 	@Inject
 	CompanyService companyService;
 
@@ -58,7 +60,8 @@ public class CompaniesResource {
 	public CompletionStage<Response> post(CompanyEntity company) throws AuthServerException {
 		try {
 			CompletionStage<Void> registerCompanyCompletionStage = companyService.register(company);
-			return registerCompanyCompletionStage.thenApply(f -> Response.accepted().entity(new GenericResponse(company.getUuid())).build());
+			return registerCompanyCompletionStage
+					.thenApply(f -> Response.accepted().entity(new GenericResponse(company.getUuid())).build());
 		} catch (ConstraintViolationException e) {
 			LOGGER.log(Level.WARNING, "Company constraint validation!", e);
 			CompletableFuture<Response> cf = new CompletableFuture<Response>();
@@ -76,7 +79,19 @@ public class CompaniesResource {
 			return cf;
 		}
 	}
-	
+
+	@GET
+	@Path("/{uuid}")
+	@RolesAllowed({ RoleConstants.END_USER, RoleConstants.ADMIN })
+	public CompanyEntity getByUUID(@PathParam("uuid") String uuid, @Context SecurityContext ctx) {
+		QuarkusJwtCallerPrincipal principal = (QuarkusJwtCallerPrincipal) ctx.getUserPrincipal();
+		if (!principal.getClaim("uuid").equals(uuid)) {
+			throw new ForbiddenException(
+					"The user can only access is own resources! It is trying to get info about another user resource.");
+		}
+		return companyService.getByUUID(uuid);
+	}
+
 	@Path("/activation/{activationKey}")
 	@POST
 	@PermitAll
@@ -93,15 +108,39 @@ public class CompaniesResource {
 			return Response.serverError().entity(new GenericResponse(e)).build();
 		}
 	}
-	
-	@GET
-	@Path("/{uuid}")
-	@RolesAllowed({RoleConstants.END_USER, RoleConstants.ADMIN})
-	public CompanyEntity getByUUID(@PathParam("uuid") String uuid, @Context SecurityContext ctx) {
-		QuarkusJwtCallerPrincipal principal = (QuarkusJwtCallerPrincipal) ctx.getUserPrincipal();
-		if(!principal.getClaim("uuid").equals(uuid)) {
-			throw new ForbiddenException("The user can only access is own resources! It is trying to get info about another user resource.");
+
+	@Path("/forgot-password")
+	@POST
+	@PermitAll
+	@Bulkhead(value = 2, waitingTaskQueue = 2)
+	public Response forgotPassword(ForgotPasswordRequest request) throws AuthServerException {
+		try {
+			companyService.forgotPassword(request.getEmail());
+			return Response.accepted(new GenericResponse()).build();
+		} catch (ConstraintViolationException e) {
+			LOGGER.log(Level.WARNING, "Company constraint validation!", e);
+			return Response.status(Status.BAD_REQUEST).entity(new GenericResponse(e)).build();
+		} catch (Exception e) {
+			LOGGER.log(Level.ERROR, "Generic exception", e);
+			return Response.serverError().entity(new GenericResponse(e)).build();
 		}
-		return companyService.getByUUID(uuid);
+	}
+
+	@Path("/reset-password/{resetPasswordKey}")
+	@POST
+	@PermitAll
+	@Bulkhead(value = 2, waitingTaskQueue = 2)
+	public Response resetPassword(@PathParam("resetPasswordKey") String resetPasswordKey,
+			ResetPasswordRequest resetPasswordRequest) throws AuthServerException {
+		try {
+			CompanyEntity resetCompany = companyService.resetPassword(resetPasswordKey, resetPasswordRequest.getPassword());
+			return Response.ok(new GenericResponse(resetCompany.getUuid())).build();
+		} catch (NoResultException e) {
+			LOGGER.log(Level.ERROR, "Invalid reset password key.", e);
+			return Response.status(Status.NOT_FOUND).entity(new GenericResponse(e)).build();
+		} catch (Exception e) {
+			LOGGER.log(Level.ERROR, "Generic exception", e);
+			return Response.serverError().entity(new GenericResponse(e)).build();
+		}
 	}
 }
