@@ -4,9 +4,11 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.logging.Level;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -16,6 +18,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import org.jboss.logging.Logger;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.mailer.MailTemplate;
 import io.quarkus.qute.api.ResourcePath;
 import pt.teamloan.authserver.AuthServerException;
@@ -32,6 +37,8 @@ import pt.teamloan.utils.UUIDMapper;
 
 @ApplicationScoped
 public class CompanyService {
+	private static final Logger LOGGER = Logger.getLogger(CompanyService.class.getName());
+	
 	@Inject
 	MailConfig mailConfig;
 
@@ -90,10 +97,34 @@ public class CompanyService {
 		return foundCompany;
 	}
 
+	@Transactional
 	public void forgotPassword(@NotBlank @Email String email) {
-		CompanyEntity foundCompany = CompanyEntity.find("email", email).singleResult();
-		setResetPasswordKey(foundCompany);
-		sendForgotPasswordEmail(foundCompany);
+		Optional<CompanyEntity> companyOptional = CompanyEntity.find("email", email).singleResultOptional();
+		if(companyOptional.isPresent()){
+			CompanyEntity company = companyOptional.get();
+			setResetPasswordKey(company);
+			sendForgotPasswordEmail(company);
+		} else {
+			LOGGER.warn("No company for forgot password provided email: " + email);
+		}
+	}
+
+	@Transactional
+	public CompanyEntity resetPassword(@NotBlank String resetPasswordKey,
+			@NotBlank @Size(min = 5, max = 128) String newPassword) throws AuthServerException, TeamLoanException {
+		CompanyEntity foundCompany = CompanyEntity.find("resetPasswordKey", resetPasswordKey).singleResult();
+		if (isDateExpired(foundCompany.getDtResetPasswordKeyExpiresAt())) {
+			throw new TeamLoanException("The reset password key has already expired.");
+		} else {
+			authServerService.resetPassword(foundCompany.getAuthSubjectUuid(), newPassword);
+			foundCompany.setResetPasswordKey(null);
+			foundCompany.setDtResetPasswordKeyExpiresAt(null);
+			if (!foundCompany.isEmailVerified()) {
+				authServerService.updateEmailToVerified(foundCompany.getAuthSubjectUuid());
+				foundCompany.setEmailVerified(true);
+			}
+		}
+		return foundCompany;
 	}
 
 	private String setActivationKey(CompanyEntity company) {
@@ -140,22 +171,4 @@ public class CompanyService {
 				.data("link", mailLink).send();
 		return sendMailCompletionStage;
 	}
-
-	public CompanyEntity resetPassword(@NotBlank String resetPasswordKey,
-			@NotBlank @Size(min = 5, max = 128) String newPassword) throws AuthServerException, TeamLoanException {
-		CompanyEntity foundCompany = CompanyEntity.find("resetPasswordKey", resetPasswordKey).singleResult();
-		if (isDateExpired(foundCompany.getDtResetPasswordKeyExpiresAt())) {
-			throw new TeamLoanException("The reset password key has already expired.");
-		} else {
-			authServerService.resetPassword(foundCompany.getAuthSubjectUuid(), newPassword);
-			foundCompany.setResetPasswordKey(null);
-			foundCompany.setDtResetPasswordKeyExpiresAt(null);
-			if (!foundCompany.isEmailVerified()) {
-				authServerService.updateEmailToVerified(foundCompany.getAuthSubjectUuid());
-				foundCompany.setEmailVerified(true);
-			}
-		}
-		return foundCompany;
-	}
-
 }

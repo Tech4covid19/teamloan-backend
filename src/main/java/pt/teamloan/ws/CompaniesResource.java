@@ -120,9 +120,6 @@ public class CompaniesResource {
 		} catch (ConstraintViolationException e) {
 			LOGGER.log(Level.WARNING, "Company constraint validation!", e);
 			return Response.status(Status.BAD_REQUEST).entity(new GenericResponse(e)).build();
-		} catch (NoResultException e) {
-			LOGGER.log(Level.WARN, "No company for forgot password provided email: " + request.getEmail(), e);
-			return Response.status(Status.NOT_FOUND).entity(new GenericResponse(e)).build();
 		} catch (Exception e) {
 			LOGGER.log(Level.ERROR, "Generic exception", e);
 			return Response.serverError().entity(new GenericResponse(e)).build();
