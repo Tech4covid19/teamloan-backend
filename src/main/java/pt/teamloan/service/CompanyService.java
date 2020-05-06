@@ -166,7 +166,7 @@ public class CompanyService {
 	private CompletionStage<Void> sendForgotPasswordEmail(CompanyEntity companyEntity) {
 		String mailLink = MessageFormat.format(mailConfig.getForgotPasswordMailLinkFormat(),
 				companyEntity.getResetPasswordKey());
-		CompletionStage<Void> sendMailCompletionStage = verificationEmailTemplate.to(companyEntity.getEmail())
+		CompletionStage<Void> sendMailCompletionStage = forgotPasswordEmailTemplate.to(companyEntity.getEmail())
 				.replyTo(mailConfig.getReplyTo()).subject(mailConfig.getForgotPasswordMailSubject())
 				.data("link", mailLink).send();
 		return sendMailCompletionStage;
