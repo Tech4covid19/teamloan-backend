@@ -134,7 +134,7 @@ public class ProspectService {
 			if (!registeredCompanies.stream().anyMatch(c -> c.getEmail().toLowerCase().equals(email))) {
 				int jitter = (int) Math.floor((Math.random() * 3d));
 				delayMinutes += MINIMUM_INTERVAL_BETEEN_EMAILS + jitter;
-				scheduler.schedule(createSendReinformMailRunnable(email), delayMinutes, TimeUnit.SECONDS);
+				scheduler.schedule(createSendReinformMailRunnable(email), delayMinutes, TimeUnit.MINUTES);
 			}
 		}
 		CompletableFuture<Void> cf = new CompletableFuture<Void>();
