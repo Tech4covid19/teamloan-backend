@@ -1,0 +1,1 @@
+ALTER TABLE prospect ADD COLUMN "fl_reinformed" boolean default false;

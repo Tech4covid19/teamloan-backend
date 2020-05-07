@@ -27,6 +27,9 @@ public class MailConfig {
 	@ConfigProperty(name = "mail.prospect-inform.subject")
 	String prospectInformMailSubject;
 
+	@ConfigProperty(name = "mail.prospect-reinform.subject")
+	String prospectReinformMailSubject;
+
 	@ConfigProperty(name = "mail.metrics.enabled", defaultValue = "true")
 	Boolean metricsEnabled;
 
@@ -83,8 +86,8 @@ public class MailConfig {
 		return forgotPasswordMailLinkFormat;
 	}
 
-	public void setForgotPasswordMailLinkFormat(String forgotPasswordMailLinkFormat) {
-		this.forgotPasswordMailLinkFormat = forgotPasswordMailLinkFormat;
+	public String getProspectReinformMailSubject() {
+		return prospectReinformMailSubject;
 	}
 
 }

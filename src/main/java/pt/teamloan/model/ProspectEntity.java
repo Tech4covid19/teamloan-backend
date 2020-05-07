@@ -44,6 +44,10 @@ public class ProspectEntity extends PanacheEntityBase {
 	@Column(name = "fl_deleted")
 	private boolean flDeleted = false;
 
+	@JsonbTransient
+	@Column(name = "fl_reinformed")
+	private boolean flReinformed = false;
+
 	public Long getId() {
 		return id;
 	}
@@ -77,4 +81,12 @@ public class ProspectEntity extends PanacheEntityBase {
 		this.flDeleted = flDeleted;
 	}
 
+	public boolean isFlReinformed() {
+		return flReinformed;
+	}
+
+	public void setFlReinformed(boolean flReinformed) {
+		this.flReinformed = flReinformed;
+	}
+	
 }

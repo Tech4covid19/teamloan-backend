@@ -81,4 +81,22 @@ public class ProspectsResource {
 			return Response.serverError().entity(new GenericResponse(e)).build();
 		}
 	}
+
+	@Path("/reinform")
+	@POST
+	@Bulkhead(value = 1, waitingTaskQueue = 1)
+	@RolesAllowed(RoleConstants.ADMIN)
+	public Response reinform() {
+		try {
+			CompletionStage<Void> sendMailCompletionStage = prospectService.sendReinformEmails();
+			sendMailCompletionStage.exceptionally(f -> {
+				LOGGER.log(Level.ERROR, "Error REinforming prospects by email!", f);
+				return null;
+			});
+			return Response.accepted().entity(new GenericResponse()).build();
+		} catch (Exception e) {
+			LOGGER.log(Level.ERROR, "Unexpected error!", e);
+			return Response.serverError().entity(new GenericResponse(e)).build();
+		}
+	}
 }
