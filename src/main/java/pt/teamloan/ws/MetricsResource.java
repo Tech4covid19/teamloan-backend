@@ -34,6 +34,6 @@ public class MetricsResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public TemplateInstance get() {
-		return metricsService.getInHtml();
+		return metricsService.getRegistrationMetricsInHtml();
 	}
 }

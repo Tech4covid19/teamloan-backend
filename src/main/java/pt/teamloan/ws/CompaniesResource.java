@@ -101,7 +101,7 @@ public class CompaniesResource {
 			CompanyEntity activatedCompany = companyService.activate(activationKey);
 			return Response.ok(new GenericResponse(activatedCompany.getUuid())).build();
 		} catch (NoResultException e) {
-			LOGGER.log(Level.ERROR, "AuthServer exception", e);
+			LOGGER.log(Level.ERROR, "Activation key not found!", e);
 			return Response.status(Status.NOT_FOUND).entity(new GenericResponse(e)).build();
 		} catch (Exception e) {
 			LOGGER.log(Level.ERROR, "Generic exception", e);

@@ -1,5 +1,7 @@
 package pt.teamloan.service;
 
+import java.text.Collator;
+import java.util.Collections;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -52,17 +54,22 @@ public class MetricsService {
                 .reduce((accumulatedTotal, nextTotal) -> accumulatedTotal + nextTotal).get();
     }
 
-    public TemplateInstance getInHtml() {
+    public TemplateInstance getRegistrationMetricsInHtml() {
         List<RegistrationMetric> registrationMetrics = getRegistrationMetrics();
+        sortRegistrationsAlphabetically(registrationMetrics);
         Long totalRegistrations = calculateTotalRegistrations(registrationMetrics);
         return metricsTemplate.data("metrics", registrationMetrics).data("totalRegistrations", totalRegistrations);
+    }
+
+    private void sortRegistrationsAlphabetically(List<RegistrationMetric> registrationMetrics) {
+        registrationMetrics.sort((rm1, rm2) -> Collator.getInstance().compare(rm1.getBusinessArea() + "_" + rm1.getIntent().name(), rm2.getBusinessArea() + "_" + rm2.getIntent().name()));
     }
 
     @Scheduled(cron = "0 0 18 * * ?")
     public void sendMetricsMail() {
         if (mailConfig.getMetricsEnabled()) {
             LOGGER.info("Running job to send registration metrics by email to: " + mailConfig.getMetricsTo());
-            Mail mail = Mail.withHtml(null, mailConfig.getMetricsSubject(), getInHtml().render());
+            Mail mail = Mail.withHtml(null, mailConfig.getMetricsSubject(), getRegistrationMetricsInHtml().render());
             mail.setTo(mailConfig.getMetricsTo());
             mailer.send(mail);
         }
