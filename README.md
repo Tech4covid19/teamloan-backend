@@ -1,6 +1,7 @@
-# TeamLoan backend API
 <img src="/src/main/resources/META-INF/resources/template-resources/mail-header-joined.jpg" width=100%>
+![dev](https://github.com/Tech4covid19/teamloan-backend/workflows/dev/badge.svg?branch=develop)
 
+# TeamLoan backend API
 This project is the [TeamLoan](https://www.teamloan.pt) backend API.
 
 ## Quarkus framework
