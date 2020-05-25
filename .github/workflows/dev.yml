@@ -3,7 +3,7 @@
 name: CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+# events but only for the develop branch
 on:
   push:
     branches: [ develop ]
@@ -32,12 +32,10 @@ jobs:
     needs: build
     runs-on: [ubuntu-18.04]
     steps:
-
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.access_key_id }}
-          aws-secret-access-key: ${{ secrets.secret_access_key }}
-          aws-region: us-east-2
+      - name: Deploy
+        run: |
+          aws ecs update-service --cluster cluster-01 --service backend-dev --force-new-deployment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.secret_access_key }}
+          AWS_DEFAULT_REGION: eu-west-3
