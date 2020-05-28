@@ -37,7 +37,9 @@ public class PostingsService {
 	private static final String LIST_QUERY_WITH_PARAMETERS = "FROM PostingEntity p " + "JOIN FETCH p.district d "
 			+ "JOIN FETCH p.municipality m " + "JOIN FETCH p.postingJobs pj " + "JOIN FETCH pj.job pjj "
 			+ "JOIN FETCH p.company c " + "JOIN FETCH c.businessArea ca "
-			+ "WHERE (p.intent = :intent OR :intent IS NULL) " + "AND (c.id = :companyId OR :companyId IS NULL) "
+			+ "WHERE (p.intent = :intent OR :intent IS NULL) " 
+			+ "AND p.status=:postingStatus"
+			+ "AND (c.id = :companyId OR :companyId IS NULL) "
 			+ "AND (d.id = :districtId OR :districtId IS NULL) "
 			+ "AND (m.id = :municipalityId OR :municipalityId IS NULL) "
 			+ "AND (ca.id = :businessAreaId OR :businessAreaId IS NULL) "
@@ -90,6 +92,8 @@ public class PostingsService {
 		} else {
 			parameters.and("businessAreaId", null);
 		}
+
+		parameters.and("postingStatus", PostingStatus.ACTIVE);
 
 		return PostingEntity.find(LIST_QUERY_WITH_PARAMETERS, Sort.descending("p.createdAt"), parameters).page(page)
 				.list();
@@ -150,11 +154,17 @@ public class PostingsService {
 				setPostingJobProperties(postingEntity);
 				foundPosting.setPostingJobs(postingEntity.getPostingJobs());
 			}
+			
+			foundPosting
+				.setClosePostingReason(postingEntity.getClosePostingReason() != null ? postingEntity.getClosePostingReason() : foundPosting.getClosePostingReason());
+			foundPosting
+				.setClosePostingDetails(postingEntity.getClosePostingDetails() != null ? postingEntity.getClosePostingDetails() : foundPosting.getClosePostingDetails());
 
 			if (postingEntity.getStatus() != null) {
 				foundPosting.setStatus(postingEntity.getStatus());
 				foundPosting.setUpdatedStatusAt(Timestamp.from(Instant.now()));
 			}
+			
 			foundPosting.persist();
 			return foundPosting;
 		} else {
