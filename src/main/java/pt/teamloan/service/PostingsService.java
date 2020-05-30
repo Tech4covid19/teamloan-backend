@@ -26,6 +26,7 @@ import pt.teamloan.model.JobEntity;
 import pt.teamloan.model.MunicipalityEntity;
 import pt.teamloan.model.PostingEntity;
 import pt.teamloan.model.PostingJobEntity;
+import pt.teamloan.model.enums.ClosePostingReason;
 import pt.teamloan.model.enums.Intent;
 import pt.teamloan.model.enums.PostingStatus;
 import pt.teamloan.utils.UUIDMapper;
@@ -156,13 +157,18 @@ public class PostingsService {
 			}
 			
 			foundPosting
-				.setClosePostingReason(postingEntity.getClosePostingReason() != null ? postingEntity.getClosePostingReason() : foundPosting.getClosePostingReason());
-			foundPosting
 				.setClosePostingDetails(postingEntity.getClosePostingDetails() != null ? postingEntity.getClosePostingDetails() : foundPosting.getClosePostingDetails());
 
+			ClosePostingReason closePostingReason = postingEntity.getClosePostingReason();	
+			if( closePostingReason != null){
+				foundPosting.setClosePostingReason(closePostingReason);
+				if(closePostingReason != ClosePostingReason.NONE){
+					setPostingStatus(foundPosting, mapPostingStatus(closePostingReason));
+				}
+			}
+
 			if (postingEntity.getStatus() != null) {
-				foundPosting.setStatus(postingEntity.getStatus());
-				foundPosting.setUpdatedStatusAt(Timestamp.from(Instant.now()));
+				setPostingStatus(foundPosting, postingEntity.getStatus());
 			}
 			
 			foundPosting.persist();
@@ -239,6 +245,18 @@ public class PostingsService {
 			jobEntity.setId(id);
 			postingJob.setJob(jobEntity);
 		}
+	}
+
+	private void setPostingStatus(PostingEntity postingEntity, PostingStatus status) throws TeamLoanException{
+		postingEntity.setStatus(status);
+		postingEntity.setUpdatedStatusAt(Timestamp.from(Instant.now()));
+	}
+
+	private PostingStatus mapPostingStatus(ClosePostingReason closePostingReason) throws TeamLoanException{
+		if(closePostingReason == ClosePostingReason.MATCH){
+			return PostingStatus.MATCHED;
+		}
+		return PostingStatus.CANCELED;
 	}
 
 	private void setPostingJobProperties(PostingEntity postingEntity) throws TeamLoanException {
