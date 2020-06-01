@@ -26,7 +26,7 @@ import pt.teamloan.model.JobEntity;
 import pt.teamloan.model.MunicipalityEntity;
 import pt.teamloan.model.PostingEntity;
 import pt.teamloan.model.PostingJobEntity;
-import pt.teamloan.model.enums.ClosePostingReason;
+import pt.teamloan.model.enums.CloseReason;
 import pt.teamloan.model.enums.Intent;
 import pt.teamloan.model.enums.PostingStatus;
 import pt.teamloan.utils.UUIDMapper;
@@ -157,14 +157,12 @@ public class PostingsService {
 			}
 			
 			foundPosting
-				.setClosePostingDetails(postingEntity.getClosePostingDetails() != null ? postingEntity.getClosePostingDetails() : foundPosting.getClosePostingDetails());
+				.setCloseReasonDetails(postingEntity.getCloseReasonDetails() != null ? postingEntity.getCloseReasonDetails() : foundPosting.getCloseReasonDetails());
 
-			ClosePostingReason closePostingReason = postingEntity.getClosePostingReason();	
-			if( closePostingReason != null){
-				foundPosting.setClosePostingReason(closePostingReason);
-				if(closePostingReason != ClosePostingReason.NONE){
-					setPostingStatus(foundPosting, mapPostingStatus(closePostingReason));
-				}
+			CloseReason closeReason = postingEntity.getClosePostingReason();	
+			if( closeReason != null){
+				foundPosting.setCloseReason(closeReason);
+				setPostingStatus(foundPosting, mapPostingStatus(closeReason));
 			}
 
 			if (postingEntity.getStatus() != null) {
@@ -252,8 +250,8 @@ public class PostingsService {
 		postingEntity.setUpdatedStatusAt(Timestamp.from(Instant.now()));
 	}
 
-	private PostingStatus mapPostingStatus(ClosePostingReason closePostingReason) throws TeamLoanException{
-		if(closePostingReason == ClosePostingReason.MATCH){
+	private PostingStatus mapPostingStatus(CloseReason closeReason){
+		if(CloseReason.MATCH.equals(closeReason)){
 			return PostingStatus.MATCHED;
 		}
 		return PostingStatus.CANCELED;

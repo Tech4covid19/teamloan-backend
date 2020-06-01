@@ -29,7 +29,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import pt.teamloan.model.enums.ClosePostingReason;
+import pt.teamloan.model.enums.CloseReason;
 import pt.teamloan.model.enums.Intent;
 import pt.teamloan.model.enums.PostingStatus;
 import pt.teamloan.model.interfaces.UUIDMappeable;
@@ -104,10 +104,12 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 	private String notes;
 
 	@Enumerated(EnumType.STRING)
-	private ClosePostingReason closePostingReason = ClosePostingReason.NONE;
+	@Column(name="close_reason")
+	private CloseReason closeReason;
 
 	@Size(max = 4000)
-	private String closePostingDetails;
+	@Column(name="close_reason_details")
+	private String closeReasonDetails;
 
 	public PostingEntity() {
 	}
@@ -270,20 +272,20 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 		this.notes = notes;
 	}
 
-	public ClosePostingReason getClosePostingReason(){
-		return this.closePostingReason;
+	public CloseReason getClosePostingReason(){
+		return this.closeReason;
 	}
 
-	public void setClosePostingReason(ClosePostingReason closePostingReason){
-		this.closePostingReason = closePostingReason;
+	public void setCloseReason(CloseReason closeReason){
+		this.closeReason = closeReason;
 	}
 
-	public String getClosePostingDetails(){
-		return this.closePostingDetails;
+	public String getCloseReasonDetails(){
+		return this.closeReasonDetails;
 	}
 
-	public void setClosePostingDetails(String closePostingDetails){
-		this.closePostingDetails = closePostingDetails;
+	public void setCloseReasonDetails(String closeReasonDetails){
+		this.closeReasonDetails = closeReasonDetails;
 	}
 
 }
