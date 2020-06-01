@@ -272,7 +272,7 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 		this.notes = notes;
 	}
 
-	public CloseReason getClosePostingReason(){
+	public CloseReason getCloseReason(){
 		return this.closeReason;
 	}
 

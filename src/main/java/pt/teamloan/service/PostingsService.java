@@ -159,7 +159,7 @@ public class PostingsService {
 			foundPosting
 				.setCloseReasonDetails(postingEntity.getCloseReasonDetails() != null ? postingEntity.getCloseReasonDetails() : foundPosting.getCloseReasonDetails());
 
-			CloseReason closeReason = postingEntity.getClosePostingReason();	
+			CloseReason closeReason = postingEntity.getCloseReason();	
 			if( closeReason != null){
 				foundPosting.setCloseReason(closeReason);
 				setPostingStatus(foundPosting, mapPostingStatus(closeReason));
