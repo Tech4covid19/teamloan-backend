@@ -29,6 +29,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Where;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import pt.teamloan.model.enums.CloseReason;
 import pt.teamloan.model.enums.Intent;
 import pt.teamloan.model.enums.PostingStatus;
 import pt.teamloan.model.interfaces.UUIDMappeable;
@@ -101,6 +102,14 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 
 	@Size(max = 4000)
 	private String notes;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name="close_reason")
+	private CloseReason closeReason;
+
+	@Size(max = 4000)
+	@Column(name="close_reason_details")
+	private String closeReasonDetails;
 
 	public PostingEntity() {
 	}
@@ -261,6 +270,22 @@ public class PostingEntity extends PanacheEntityBase implements Serializable, UU
 
 	public void setNotes(String notes) {
 		this.notes = notes;
+	}
+
+	public CloseReason getCloseReason(){
+		return this.closeReason;
+	}
+
+	public void setCloseReason(CloseReason closeReason){
+		this.closeReason = closeReason;
+	}
+
+	public String getCloseReasonDetails(){
+		return this.closeReasonDetails;
+	}
+
+	public void setCloseReasonDetails(String closeReasonDetails){
+		this.closeReasonDetails = closeReasonDetails;
 	}
 
 }
