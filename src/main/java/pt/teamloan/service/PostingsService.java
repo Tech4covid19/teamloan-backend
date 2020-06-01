@@ -39,7 +39,7 @@ public class PostingsService {
 			+ "JOIN FETCH p.municipality m " + "JOIN FETCH p.postingJobs pj " + "JOIN FETCH pj.job pjj "
 			+ "JOIN FETCH p.company c " + "JOIN FETCH c.businessArea ca "
 			+ "WHERE (p.intent = :intent OR :intent IS NULL) " 
-			+ "AND p.status=:postingStatus"
+			+ "AND p.status=:postingStatus "
 			+ "AND (c.id = :companyId OR :companyId IS NULL) "
 			+ "AND (d.id = :districtId OR :districtId IS NULL) "
 			+ "AND (m.id = :municipalityId OR :municipalityId IS NULL) "
@@ -164,8 +164,7 @@ public class PostingsService {
 				foundPosting.setCloseReason(closeReason);
 				setPostingStatus(foundPosting, mapPostingStatus(closeReason));
 			}
-
-			if (postingEntity.getStatus() != null) {
+			else if (postingEntity.getStatus() != null) {
 				setPostingStatus(foundPosting, postingEntity.getStatus());
 			}
 			
