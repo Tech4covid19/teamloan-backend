@@ -21,6 +21,15 @@ jobs:
           java-version: '11.0.4' # The JDK version to make available on the path.
       - name: Maven build
         run: mvn clean package -Dquarkus-profile=dev -Dquarkus.container-image.build=true -Dquarkus.container-image.tag=dev
+      - name: Push Build to Releases
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "target/teamloan-backend-*-runner.jar"
+          commit: develop
+          tag: dev
+          replacesArtifacts: true
+          allowUpdates: true
+          token: ${{ secrets.TOKEN }}
       - name: Docker login
         uses: azure/docker-login@v1
         with:
