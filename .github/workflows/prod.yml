@@ -1,12 +1,12 @@
 # This is a basic workflow to help you get started with Actions
 
-name: dev
+name: prod
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the develop branch
 on:
   push:
-    branches: [ develop ]
+    branches: [ master ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -15,41 +15,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
       - name: Setup Java
         uses: actions/setup-java@v1
         with:
           java-version: '11.0.4' # The JDK version to make available on the path.
-      
+      - name: Set release to "master" + GITHUB_RUN_ID
+        run: |
+          echo "::set-env name=release_id::master-$GITHUB_RUN_ID"
       - name: Maven build
-        run: mvn clean package -Dquarkus-profile=dev -Dquarkus.container-image.build=true -Dquarkus.container-image.tag=dev
-      
+        run: mvn clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.tag=prod
       - name: Push Build to Releases
         uses: ncipollo/release-action@v1
         with:
           artifacts: "target/teamloan-backend-*-runner.jar"
-          commit: develop
-          tag: dev
+          commit: master
+          tag: ${{ env.RELEASE_ID }}
           replacesArtifacts: true
           allowUpdates: true
           token: ${{ secrets.TOKEN }}
-      
       - name: Docker login
         uses: azure/docker-login@v1
         with:
           username: ${{ secrets.docker_user }}
           password: ${{ secrets.docker_password }}
-      
       - name: Docker push
-        run: docker push teamloan/teamloan-backend:dev
-  
+        run: docker push teamloan/teamloan-backend:prod
   deploy:
     needs: build
     runs-on: [ubuntu-18.04]
     steps:
       - name: Deploy
         run: |
-          aws ecs update-service --cluster cluster-01 --service backend-dev --force-new-deployment
+          aws ecs update-service --cluster cluster-01 --service backend-prd --force-new-deployment
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.secret_access_key }}

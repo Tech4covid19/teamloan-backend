@@ -13,7 +13,7 @@ body {
 	height: 105px;
 	left: 283px;
 	top: 20px;
-	background: url(https://teamloan.pt/template-resources/mail-header.jpg);
+	background: url(https://app.teamloan.pt/template-resources/mail-header.jpg);
 }
 
 #mail-body {
@@ -40,7 +40,7 @@ body {
 	height: 57px;
 	left: 69px;
 	top: 24px;
-	background: url(https://teamloan.pt/template-resources/logo.svg);
+	background: url(https://app.teamloan.pt/template-resources/logo.svg);
 }
 
 #mail-body-thumbs-up {
@@ -49,7 +49,7 @@ body {
 	height: 54px;
 	left: 69px;
 	top: 143px;
-	background: url(https://teamloan.pt/template-resources/thumbs-up.svg);
+	background: url(https://app.teamloan.pt/template-resources/thumbs-up.svg);
 }
 
 #mail-body-title {
