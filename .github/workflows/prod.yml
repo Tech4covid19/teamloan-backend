@@ -29,7 +29,7 @@ jobs:
         with:
           artifacts: "target/teamloan-backend-*-runner.jar"
           commit: master
-          tag: ${{ env.RELEASE_ID }}
+          tag: ${{ env.release_id }}
           replacesArtifacts: true
           allowUpdates: true
           token: ${{ secrets.TOKEN }}
