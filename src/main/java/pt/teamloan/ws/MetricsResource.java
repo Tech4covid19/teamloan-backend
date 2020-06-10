@@ -25,7 +25,7 @@ import pt.teamloan.service.MetricsService;
 public class MetricsResource {
 	private static final Logger LOGGER = Logger.getLogger(MetricsResource.class.getName());
 
-	@ResourcePath("metrics/metrics")
+	@ResourcePath("admin/metrics/metrics")
 	Template metricsTemplate;
 
 	@Inject

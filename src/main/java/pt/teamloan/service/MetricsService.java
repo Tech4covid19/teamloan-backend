@@ -25,7 +25,7 @@ public class MetricsService {
 
     private static final Logger LOGGER = Logger.getLogger(MetricsService.class.getName());
 
-    @ResourcePath("metrics/metrics")
+    @ResourcePath("admin/metrics/metrics")
     Template metricsTemplate;
 
     @Inject
